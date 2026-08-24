@@ -1,4 +1,5 @@
 ﻿using AircraftMaintenanceOperations.Application.Features.MaintenanceRequests.Commands.StartMaintenanceRequest;
+using AircraftMaintenanceOperations.Application.Features.MaintenanceTask.Queries.GetMaintenanceTaskQuery;
 
 namespace AircraftMaintenanceOperations.API.Endpoints.Maintenance;
 
@@ -13,7 +14,7 @@ public class MaintenanceEndpoints : ICarterModule
 {
     public void AddRoutes(IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("/api/maintenance").WithTags("Maintenance");
+        var group = app.MapGroup("/api/maintenance").WithTags("Maintenance").RequireAuthorization("Supervisor");
 
         group.MapPost("/", async(CreateMaintenanceCommand command, ISender sender) =>
         {
@@ -88,5 +89,15 @@ public class MaintenanceEndpoints : ICarterModule
             .WithSummary("Starts an existing maintenance record.")
             .WithDescription("Start Maintenance");
 
+        group.MapGet("/tasks", async (ISender sender, [AsParameters] GetMaintenanceTaskQuery query) =>
+        {
+            var result = await sender.Send(query);
+
+            return Results.Ok(result);
+        })
+            .WithName("GetMaintenanceTasks")
+            .Produces<GetMaintenanceTaskQueryResult>(StatusCodes.Status200OK)
+            .WithSummary("Retrieves the maintenance task queue.")
+            .WithDescription("Retrieves active maintenance requests and work orders.");
     }
 }

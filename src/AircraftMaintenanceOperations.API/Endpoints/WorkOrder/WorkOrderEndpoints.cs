@@ -24,6 +24,7 @@ public class WorkOrderEndpoints : ICarterModule
             return Results.Ok(result);
         })
             .WithName("GetAllWorkOrders")
+            .RequireAuthorization("Supervisor")
             .Produces<List<WorkOrderDto>>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .WithSummary("Retrieves all work orders.")
@@ -36,6 +37,7 @@ public class WorkOrderEndpoints : ICarterModule
             return Results.Ok(result.WorkOrder);
         })
             .WithName("GetWorkOrderById")
+            .RequireAuthorization("WorkOrderAccess")
             .Produces<WorkOrderDto>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status404NotFound)
             .WithSummary("Retrieves a work order by its ID.")

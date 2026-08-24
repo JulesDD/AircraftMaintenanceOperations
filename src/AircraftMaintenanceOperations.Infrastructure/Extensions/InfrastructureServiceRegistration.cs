@@ -38,6 +38,10 @@ public static class InfrastructureServiceRegistration
 
         services.AddScoped<IAuthenticationService, IdentityAuthenticationService>();
 
+        services.AddHttpContextAccessor();
+
+        services.AddScoped<ICurrentUserService, CurrentUserService>();
+
 
         return services;
     }

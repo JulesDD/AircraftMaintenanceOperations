@@ -1,4 +1,5 @@
-﻿global using AircraftMaintenanceOperations.Application.Extensions;
+﻿global using AircraftMaintenanceOperations.Application.Common.Exceptions;
+global using AircraftMaintenanceOperations.Application.Extensions;
 global using AircraftMaintenanceOperations.Application.Features.Aircraft.Commands.ArchiveAircraft;
 global using AircraftMaintenanceOperations.Application.Features.Aircraft.Commands.CreateAircraft;
 global using AircraftMaintenanceOperations.Application.Features.Aircraft.Commands.UpdateAircraft;
@@ -13,6 +14,7 @@ global using AircraftMaintenanceOperations.Application.Features.MaintenanceReque
 global using AircraftMaintenanceOperations.Application.Features.MaintenanceRequests.Commands.UpdatedMaintenanceRequest;
 global using AircraftMaintenanceOperations.Application.Features.MaintenanceRequests.Queries.GetMaintenanceQuery;
 global using AircraftMaintenanceOperations.Application.Features.MaintenanceRequests.Queries.GetMaintenanceQueryById;
+global using AircraftMaintenanceOperations.Application.Features.MaintenanceTask.Queries.GetMaintenanceTaskQuery;
 global using AircraftMaintenanceOperations.Application.Features.Pilot.Commands.CreatePilot;
 global using AircraftMaintenanceOperations.Application.Features.Pilot.Commands.UpdatePilot;
 global using AircraftMaintenanceOperations.Application.Features.Pilot.Queries.ArchivePilot;
@@ -30,11 +32,14 @@ global using AircraftMaintenanceOperations.Application.Features.WorkOrders.Comma
 global using AircraftMaintenanceOperations.Application.Features.WorkOrders.Queries.GetWorkOrderByIdQuery;
 global using AircraftMaintenanceOperations.Application.Features.WorkOrders.Queries.GetWorkOrderQuery;
 global using AircraftMaintenanceOperations.Domain.Enums;
+global using AircraftMaintenanceOperations.Infrastructure.Authentication;
 global using AircraftMaintenanceOperations.Infrastructure.Extensions;
+global using AircraftMaintenanceOperations.Infrastructure.Persistence.Context;
 global using Carter;
 global using Mapster;
 global using MediatR;
-global using System.Reflection;
-global using AircraftMaintenanceOperations.Infrastructure.Authentication;
-global using AircraftMaintenanceOperations.Infrastructure.Persistence.Context;
+global using Microsoft.AspNetCore.Diagnostics;
 global using Microsoft.AspNetCore.Identity;
+global using Microsoft.AspNetCore.Mvc;
+global using Microsoft.OpenApi.Models;
+global using System.Reflection;
