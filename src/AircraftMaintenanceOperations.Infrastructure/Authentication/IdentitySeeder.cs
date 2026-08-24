@@ -1,6 +1,4 @@
-﻿using AircraftMaintenanceOperations.Domain.Enums;
-
-namespace AircraftMaintenanceOperations.Infrastructure.Authentication;
+﻿namespace AircraftMaintenanceOperations.Infrastructure.Authentication;
 
 public static class IdentitySeeder
 {
@@ -10,7 +8,10 @@ public static class IdentitySeeder
         {
             "Admin",
             "MaintenanceSupervisor",
-            "Technician"
+            "Technician",
+            "InventoryClerk",
+            "Pilot",
+            "OperationsManager"
         };
 
         foreach (var role in roles)

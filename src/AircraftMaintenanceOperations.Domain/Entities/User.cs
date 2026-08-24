@@ -9,4 +9,24 @@ public class User : BaseEntity
     public string? PhoneNumber { get; protected set; } = string.Empty;
     public Role Role { get; protected set; }
     public EmploymentStatus Status { get; protected set; }
+
+    public static User Create(
+        string employeeNumber,
+        string firstName,
+        string lastName,
+        string email,
+        string phoneNumber,
+        Role role)
+    {
+        return new User
+        {
+            EmployeeNumber = employeeNumber,
+            FirstName = firstName,
+            LastName = lastName,
+            Email = email,
+            PhoneNumber = phoneNumber,
+            Role = role,
+            Status = EmploymentStatus.Active
+        };
+    }
 }

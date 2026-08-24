@@ -9,6 +9,7 @@
   <ItemGroup>
     <Folder Include="Features\Aircraft\Mappings\" />
     <Folder Include="Features\Inventory\" />
+    <Folder Include="Features\User\Queries\" />
   </ItemGroup>
 
   <ItemGroup>
