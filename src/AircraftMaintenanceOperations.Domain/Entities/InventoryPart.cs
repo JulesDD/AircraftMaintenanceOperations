@@ -8,7 +8,7 @@ public class InventoryPart : BaseEntity
     public int MinimumQuantity { get; set; } 
     public string Location { get; set; } = string.Empty;
 
-    public void Reserve(int quantity)
+    public void ReserveStock(int quantity)
     {
         if (quantity <= 0)
         {
