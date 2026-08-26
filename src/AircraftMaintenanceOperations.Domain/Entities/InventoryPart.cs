@@ -34,4 +34,13 @@ public class InventoryPart : BaseEntity
     {
         return QuantityOnHand <= MinimumQuantity;
     }
+
+    public void Consume(int quantity)
+    {
+        if (quantity <= 0) throw new ArgumentException("Quantity to consume must be greater than zero.");
+
+        if (quantity > QuantityOnHand) throw new InvalidOperationException("Not enough quantity on hand to consume.");
+
+        QuantityOnHand -= quantity;
+    }
 }

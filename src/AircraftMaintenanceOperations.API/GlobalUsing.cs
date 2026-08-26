@@ -7,6 +7,7 @@ global using AircraftMaintenanceOperations.Application.Features.Aircraft.Queries
 global using AircraftMaintenanceOperations.Application.Features.Aircraft.Queries.GetAircraftById;
 global using AircraftMaintenanceOperations.Application.Features.AssignPilot.Command;
 global using AircraftMaintenanceOperations.Application.Features.DTOs;
+global using AircraftMaintenanceOperations.Application.Features.InventoryTransaction.ReceiveInventory;
 global using AircraftMaintenanceOperations.Application.Features.Login.Commands.CreateLogin;
 global using AircraftMaintenanceOperations.Application.Features.MaintenanceRequests.Commands.ArchiveMaintenanceRequest;
 global using AircraftMaintenanceOperations.Application.Features.MaintenanceRequests.Commands.CreatedMaintenanceRequest;

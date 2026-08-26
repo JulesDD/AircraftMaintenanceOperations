@@ -55,7 +55,6 @@ public class WorkOrder : BaseEntity
         EstimatedCompletionDate = estimatedCompletionDate;
     }
 
-
     public void MediumPriority()
     {
         WorkOrderPriority = MaintenancePriority.Medium;

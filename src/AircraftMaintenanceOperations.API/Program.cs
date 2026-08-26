@@ -9,6 +9,7 @@ builder.Services.AddAuthorization(opt =>
     opt.AddPolicy("Supervisor", policy => policy.RequireRole("Admin", "MaintenanceSupervisor"));
     opt.AddPolicy("Technician", policy => policy.RequireRole("Technician"));
     opt.AddPolicy("WorkOrderAccess", policy => policy.RequireRole("Admin", "MaintenanceSupervisor", "Technician"));
+    opt.AddPolicy("InventoryManagement", policy => policy.RequireRole("InventoryClerk", "OperationsManager", "Admin", "MaintenanceSupervisor"));
 });
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();

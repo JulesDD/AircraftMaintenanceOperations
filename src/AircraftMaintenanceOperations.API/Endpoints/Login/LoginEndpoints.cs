@@ -12,7 +12,7 @@ public class LoginEndpoints : ICarterModule
             .WithName("CreateLogin")
             .Produces<CreateLoginCommandResult>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status401Unauthorized)
-            .WithSummary("Authenticate a user.")
+            .WithSummary("Login.")
             .WithDescription("Authenticates a user and returns a JWT access token.");
     }
 }
