@@ -1,10 +1,23 @@
-﻿namespace AircraftMaintenanceOperations.API.Endpoints.ReceiveInventory;
+﻿using Azure.Core;
 
-public class ReceiveInventoryEndpoints : ICarterModule
+namespace AircraftMaintenanceOperations.API.Endpoints.ReceiveInventory;
+
+public class InventoryEndpoints : ICarterModule
 {
     public void AddRoutes(IEndpointRouteBuilder app)
     {
         var group = app.MapGroup("/api/inventory").WithTags("Inventory").RequireAuthorization("InventoryManagement");
+
+        group.MapPost("/", async (CreateInventoryCommand command, ISender sender) => {
+            var result = await sender.Send(command);
+            return Results.Created($"/api/inventory/{result.Id}", result);
+        })
+            .WithName("CreateInventory")
+            .Produces<CreateInventoryCommandResult>(StatusCodes.Status201Created)
+            .ProducesProblem(StatusCodes.Status400BadRequest)
+            .ProducesProblem(StatusCodes.Status404NotFound)
+            .WithSummary("Create Inventory.")
+            .WithDescription("Create a new inventory part.");
 
         group.MapPost("/{inventoryPartId}/receive", async(Guid inventoryPartId, ReceiveInventoryCommand command, ISender sender) =>
         {
@@ -19,13 +32,18 @@ public class ReceiveInventoryEndpoints : ICarterModule
             .WithSummary("Receieve Inventory.")
             .WithDescription("Receive stock for an inventory part and record the inventory transaction.");
 
-        group.MapPost("/{inventoryPartId}/issue", async () => { 
+        group.MapPost("/{inventoryPartId}/issue", async (Guid inventoryPartId, Guid workOrderId, IssueInventoryCommand command, ISender sender) =>
+        {
+            var iInventory = new IssueInventoryCommand(inventoryPartId, workOrderId, command.Quantity, command.Reason);
+            var result = await sender.Send(iInventory);
+            return Results.Created($"/api/inventory/{inventoryPartId}/transactions/{result.Id}", result);
         })
             .WithName("IssueInventory")
-            .Produces(StatusCodes.Status201Created)
+            .Produces<IssueInventoryCommandResult>(StatusCodes.Status201Created)
             .ProducesProblem(StatusCodes.Status400BadRequest)
-            .WithSummary("Issue Inventory")
-            .WithDescription("Issue Inventory");
+            .ProducesProblem(StatusCodes.Status404NotFound)
+            .WithSummary("Issue Inventory.")
+            .WithDescription("Issue stock for an inventory part and record the inventory transaction.");
 
         group.MapPost("/{inventoryPartId}/adjust", async () => {
         })

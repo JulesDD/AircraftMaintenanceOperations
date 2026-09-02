@@ -4,6 +4,7 @@ using AircraftMaintenanceOperations.Infrastructure.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AircraftMaintenanceOperations.Infrastructure.Migrations
 {
     [DbContext(typeof(AircraftMaintenanceDbContext))]
-    partial class AircraftMaintenanceDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260902214259_AddInventoryPartType")]
+    partial class AddInventoryPartType
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

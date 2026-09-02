@@ -8,7 +8,7 @@
 
   <ItemGroup>
     <Folder Include="Features\Aircraft\Mappings\" />
-    <Folder Include="Features\InventoryTransaction\ResevervedInventory\" />
+    <Folder Include="Features\InventoryTransaction\Commands\ResevervedInventory\" />
     <Folder Include="Features\User\Queries\" />
   </ItemGroup>
 

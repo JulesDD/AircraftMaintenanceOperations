@@ -4,9 +4,30 @@ public class InventoryPart : BaseEntity
 {
     public string PartNumber { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
+    public InventoryPartType Type { get; set; }
     public int QuantityOnHand { get; set; }
     public int MinimumQuantity { get; set; } 
     public string Location { get; set; } = string.Empty;
+    
+    public static InventoryPart Create(
+        string partNumber,
+        string description,
+        InventoryPartType type,
+        int quantityOnHand,
+        int minimumQuantity,
+        string location
+        )
+    {
+        return new InventoryPart
+        {
+            PartNumber = partNumber,
+            Description = description,
+            Type = type,
+            QuantityOnHand = quantityOnHand,
+            MinimumQuantity = minimumQuantity,
+            Location = location
+        };
+    }
 
     public void ReserveStock(int quantity)
     {
