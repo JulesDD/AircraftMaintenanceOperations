@@ -1,8 +1,8 @@
 ﻿namespace AircraftMaintenanceOperations.Application.Features.InventoryTransaction.Commands.IssueInventory;
 
-public class IssueIventoryCommandValidation : AbstractValidator<IssueInventoryCommand>
+public class IssueInventoryCommandValidator : AbstractValidator<IssueInventoryCommand>
 {
-    public IssueIventoryCommandValidation()
+    public IssueInventoryCommandValidator()
     {
         RuleFor(x => x.InventoryPartId).NotEmpty().WithMessage("Please provide Inventory part Id");
         RuleFor(x => x.WorkOrderId).NotEmpty().WithMessage("Please provide Work Order Id");

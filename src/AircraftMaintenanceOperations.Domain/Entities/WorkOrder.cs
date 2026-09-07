@@ -23,7 +23,6 @@ public class WorkOrder : BaseEntity
         string workOrderNumber,
         Guid maintenanceRequestId,
         Guid aircraftId,
-        Guid assignedTechnicianId,
         MaintenancePriority workOrderPriority,
         DateTime estimatedCompletionDate,
         string laborNotes)
@@ -33,7 +32,6 @@ public class WorkOrder : BaseEntity
             WorkOrderNumber = workOrderNumber,
             MaintenanceRequestId = maintenanceRequestId,
             AircraftId = aircraftId,
-            AssignedTechnicianId = assignedTechnicianId,
             WorkOrderPriority = workOrderPriority,
             WorkOrderStatus = WorkOrderStatus.Open,
             EstimatedCompletionDate = estimatedCompletionDate,
@@ -70,20 +68,14 @@ public class WorkOrder : BaseEntity
         WorkOrderPriority = MaintenancePriority.Critical;
     }
 
-    public DomainResult AssignTechnician(Technician technician)
+    public DomainResult AssignTechnician(Technician technician, string laborNotes)
     {
         if (technician is null) return new(false, "Invalid technician.");
         if (WorkOrderStatus == WorkOrderStatus.Archived) return new(false, "Archived work orders cannot be assigned to a technician.");
         if (technician.Status != EmploymentStatus.Active) return new(false, "Only active technicians can be assigned to work orders.");
+        if(string.IsNullOrWhiteSpace(laborNotes)) return new(false, "A status note is required.");
 
         AssignedTechnicianId = technician.Id;
-        return new(true);
-    }
-
-    public DomainResult AssignWorkOrder(string laborNotes)
-    {
-        if (string.IsNullOrWhiteSpace(laborNotes)) return new(false, "A status note is required.");
-        if (WorkOrderStatus != WorkOrderStatus.Open) return new(false, "Only open work orders can be assigned.");
         WorkOrderStatus = WorkOrderStatus.Assigned;
         LaborNotes = laborNotes;
         return new(true);

@@ -18,7 +18,6 @@ public class CreateWorkOrderHandler(IAircraftMaintenanceDbContext dbContext, INu
             workOrderNumber,
             command.MaintenanceRequestId,
             command.AircraftId,
-            command.AssignedTechnicianId,
             command.WorkOrderPriority,
             command.EstimatedCompletionDate,
             command.LaborNotes

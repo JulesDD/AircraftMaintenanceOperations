@@ -1,4 +1,6 @@
-﻿namespace AircraftMaintenanceOperations.API.Endpoints.WorkOrder;
+﻿using AircraftMaintenanceOperations.Application.Features.WorkOrders.Command.InProgressCommand;
+
+namespace AircraftMaintenanceOperations.API.Endpoints.WorkOrder;
 
 public class WorkOrderEndpoints : ICarterModule
 {
@@ -74,7 +76,7 @@ public class WorkOrderEndpoints : ICarterModule
 
         group.MapPatch("/{id:guid}/assign-technician", async (Guid id, AssignTechnicianCommand request, ISender sender) =>
         {
-            var command = new AssignTechnicianCommand(id, request.TechnicianId);
+            var command = new AssignTechnicianCommand(id, request.TechnicianId, request.LaborNotes);
             var result = await sender.Send(command);
             return Results.Ok(result);
         })
@@ -83,5 +85,17 @@ public class WorkOrderEndpoints : ICarterModule
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .WithSummary("Assigns a technician to a work order.")
             .WithDescription("Assign Technician to Work Order");
+
+        group.MapPatch("/{id:guid}/in-progress", async (Guid id, InProgressCommand request, ISender sender) =>
+        { 
+            var command = new InProgressCommand(id, request.TechnicianId, request.LaborNotes);
+            var result = await sender.Send(command);
+            return Results.Ok(result);
+        })
+            .WithName("WorkOrderInProgress")
+            .Produces<InProgressCommandResult>(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status400BadRequest)
+            .WithSummary("Updates a work order to in-progress status.")
+            .WithDescription("Update Work Order to In Progress");
     }
 }

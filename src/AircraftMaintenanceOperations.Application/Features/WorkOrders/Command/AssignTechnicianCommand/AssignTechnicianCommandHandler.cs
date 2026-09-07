@@ -9,7 +9,7 @@ public class AssignTechnicianCommandHandler(IAircraftMaintenanceDbContext dbCont
 
         if(technician is null || workOrder is null) return new AssignTechnicianResult(false);
 
-        var assignTech = workOrder.AssignTechnician(technician);
+        var assignTech = workOrder.AssignTechnician(technician, command.LaborNotes);
 
         if (!assignTech.IsSuccess) return new AssignTechnicianResult(false, assignTech.ErrorMessage);
         await dbContext.SaveChangesAsync(cancellationToken);

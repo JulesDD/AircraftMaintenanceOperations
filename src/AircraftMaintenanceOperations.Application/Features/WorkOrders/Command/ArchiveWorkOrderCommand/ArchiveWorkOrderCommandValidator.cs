@@ -4,6 +4,6 @@ public class ArchiveWorkOrderCommandValidator : AbstractValidator<ArchiveWorkOrd
 {
     public ArchiveWorkOrderCommandValidator()
     {
-        RuleFor(dm => dm.WorkOrderId).NotEmpty().WithMessage("Work Order ID is required.");
+        RuleFor(awo => awo.WorkOrderId).NotEmpty().WithMessage("Work Order ID is required.");
     }
 }

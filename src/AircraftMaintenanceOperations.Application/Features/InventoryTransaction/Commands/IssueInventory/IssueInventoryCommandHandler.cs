@@ -34,12 +34,21 @@ internal class IssueInventoryCommandHandler(IAircraftMaintenanceDbContext DbCont
             quantityBefore,
             quantityAfter,
             CurrentUser.DomainUserId,
+            workOrderId: workOrder.Id,
             reason: command.Reason);
         
         DbContext.InventoryUsages.Add(inventoryUsage);
         DbContext.InventoryTransactions.Add(inventoryTransaction);
 
-        await DbContext.SaveChangesAsync(cancellationToken);
+        try
+        {
+            await DbContext.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateException ex)
+        {
+            throw new InvalidOperationException($"Failed to save inventory issue: {ex.InnerException?.Message ?? ex.Message}", ex);
+        }
+
         return new IssueInventoryCommandResult(inventoryTransaction.Id);
     }
 }
