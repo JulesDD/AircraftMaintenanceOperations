@@ -1,6 +1,6 @@
 ﻿namespace AircraftMaintenanceOperations.Application.Features.InventoryTransaction.Commands.ReceiveInventory;
 
-internal class ReceiveInventoryCommandHandler(IAircraftMaintenanceDbContext DbContext, ICurrentUserService CurrentUser) : ICommandHandler<ReceiveInventoryCommand, ReceiveInventoryCommandResult>
+public class ReceiveInventoryCommandHandler(IAircraftMaintenanceDbContext DbContext, ICurrentUserService CurrentUser) : ICommandHandler<ReceiveInventoryCommand, ReceiveInventoryCommandResult>
 {
     public async Task<ReceiveInventoryCommandResult> Handle(ReceiveInventoryCommand command, CancellationToken cancellationToken)
     {

@@ -1,6 +1,6 @@
 ﻿namespace AircraftMaintenanceOperations.Application.Features.InventoryTransaction.Commands.IssueInventory;
 
-internal class IssueInventoryCommandHandler(IAircraftMaintenanceDbContext DbContext, ICurrentUserService CurrentUser) 
+public class IssueInventoryCommandHandler(IAircraftMaintenanceDbContext DbContext, ICurrentUserService CurrentUser) 
     : ICommandHandler<IssueInventoryCommand, IssueInventoryCommandResult>
 {
     public async Task<IssueInventoryCommandResult> Handle(IssueInventoryCommand command, CancellationToken cancellationToken)

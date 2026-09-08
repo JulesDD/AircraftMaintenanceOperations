@@ -29,26 +29,30 @@ public class InventoryPart : BaseEntity
         };
     }
 
-    public void ReserveStock(int quantity)
+    public DomainResult ReserveStock(int quantity)
     {
-        if (quantity <= 0)
-        {
-            throw new ArgumentException("Quantity to reserve must be greater than zero.");
-        }
-        if (quantity > QuantityOnHand)
-        {
-            throw new InvalidOperationException("Not enough quantity on hand to reserve.");
-        }
+        if (quantity <= 0) return new(false, "Quantity to reserve must be greater than zero.");
+        if (quantity > QuantityOnHand) return new(false, "Not enough quantity on hand to reserve.");
+        
         QuantityOnHand -= quantity;
+        return new(true);
     }
 
-    public void ReceivedStock(int quantity)
+    public DomainResult ReceivedStock(int quantity)
     {
-        if (quantity <= 0)
-        {
-            throw new ArgumentException("Quantity received must be greater than zero.");
-        }
+        if (quantity <= 0) return new(false, "Quantity received must be greater than zero.");
+
         QuantityOnHand += quantity;
+        return new(true);
+    }
+
+    public DomainResult AdjustStock(int quantity)
+    {
+        if (quantity == 0) return new(false, "Adjustment quantity cannot be zero.");
+        if (QuantityOnHand + quantity < 0) return new(false, "Adjustment cannot reduce inventory below zero.");
+
+        QuantityOnHand += quantity;
+        return new(true);
     }
 
     public bool NeedsRestock()
@@ -56,12 +60,12 @@ public class InventoryPart : BaseEntity
         return QuantityOnHand <= MinimumQuantity;
     }
 
-    public void Consume(int quantity)
+    public DomainResult Consume(int quantity)
     {
-        if (quantity <= 0) throw new ArgumentException("Quantity to consume must be greater than zero.");
-
-        if (quantity > QuantityOnHand) throw new InvalidOperationException("Not enough quantity on hand to consume.");
+        if (quantity <= 0) return new(false, "Quantity to consume must be greater than zero.");
+        if (quantity > QuantityOnHand) return new(false, "Not enough quantity on hand to consume.");
 
         QuantityOnHand -= quantity;
+        return new(true);
     }
 }
