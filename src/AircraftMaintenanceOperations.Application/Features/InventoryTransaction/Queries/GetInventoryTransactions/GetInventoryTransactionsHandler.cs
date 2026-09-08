@@ -1,0 +1,5 @@
+﻿namespace AircraftMaintenanceOperations.Application.Features.InventoryTransaction.Queries.GetInventoryTransactions;
+
+internal class GetInventoryTransactionsHandler
+{
+}

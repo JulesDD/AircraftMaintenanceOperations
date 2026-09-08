@@ -1,4 +1,7 @@
 ﻿using AircraftMaintenanceOperations.Application.Features.InventoryTransaction.Commands.AdjustInventory;
+using AircraftMaintenanceOperations.Application.Features.InventoryTransaction.Queries.GetInventory;
+using AircraftMaintenanceOperations.Application.Features.InventoryTransaction.Queries.GetInventoryById;
+using AircraftMaintenanceOperations.Domain.Entities;
 
 namespace AircraftMaintenanceOperations.API.Endpoints.ReceiveInventory;
 
@@ -66,21 +69,31 @@ public class InventoryEndpoints : ICarterModule
             .WithSummary("Adjust Inventory")
             .WithDescription("Adjust Inventory");
 
-        //group.MapGet("/", async () => {
-        //})
-        //    .WithName("GetInventory")
-        //    .Produces(StatusCodes.Status200OK)
-        //    .ProducesProblem(StatusCodes.Status404NotFound)
-        //    .WithSummary("Get Inventory.")
-        //    .WithDescription("Retrieve inventory parts.");
+        group.MapGet("/", async (ISender sender) =>
+        {
+            var query = new GetInventoryQuery();
+            var result = await sender.Send(query);
+            return Results.Ok(new GetInventoryQueryResult(result.Items));
+        })
+            .WithName("GetInventory")
+            .Produces(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status404NotFound)
+            .WithSummary("Get All Inventory.")
+            .WithDescription("Retrieve all inventory parts.");
 
-        //group.MapGet("/{inventoryPartId}", async () => {
-        //})
-        //    .WithName("GetInventoryPart")
-        //    .Produces(StatusCodes.Status200OK)
-        //    .ProducesProblem(StatusCodes.Status404NotFound)
-        //    .WithSummary("Get inventory part.")
-        //    .WithDescription("Retrieve a specific inventory part.");
+        group.MapGet("/{inventoryPartId:guid}", async (Guid id, ISender sender) =>
+        {
+            var query = new GetInventoryByIdQuery(id);
+            var result = await sender.Send(query);
+            if (result.Item is null) return Results.NotFound();
+
+            return Results.Ok(result.Item);
+        })
+            .WithName("GetInventoryPart")
+            .Produces(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status404NotFound)
+            .WithSummary("Get specific inventory part.")
+            .WithDescription("Retrieve a specific inventory part.");
 
         //group.MapGet("/{inventoryPartId}/transactions", async () => {
         //})
