@@ -1,9 +1,4 @@
-﻿using AircraftMaintenanceOperations.Application.Features.InventoryTransaction.Commands.AdjustInventory;
-using AircraftMaintenanceOperations.Application.Features.InventoryTransaction.Queries.GetInventory;
-using AircraftMaintenanceOperations.Application.Features.InventoryTransaction.Queries.GetInventoryById;
-using AircraftMaintenanceOperations.Domain.Entities;
-
-namespace AircraftMaintenanceOperations.API.Endpoints.ReceiveInventory;
+﻿namespace AircraftMaintenanceOperations.API.Endpoints.Inventory;
 
 public class InventoryEndpoints : ICarterModule
 {
@@ -81,9 +76,9 @@ public class InventoryEndpoints : ICarterModule
             .WithSummary("Get All Inventory.")
             .WithDescription("Retrieve all inventory parts.");
 
-        group.MapGet("/{inventoryPartId:guid}", async (Guid id, ISender sender) =>
+        group.MapGet("/{inventoryPartId:guid}", async (Guid inventoryPartId, ISender sender) =>
         {
-            var query = new GetInventoryByIdQuery(id);
+            var query = new GetInventoryByIdQuery(inventoryPartId);
             var result = await sender.Send(query);
             if (result.Item is null) return Results.NotFound();
 
@@ -95,12 +90,16 @@ public class InventoryEndpoints : ICarterModule
             .WithSummary("Get specific inventory part.")
             .WithDescription("Retrieve a specific inventory part.");
 
-        //group.MapGet("/{inventoryPartId}/transactions", async () => {
-        //})
-        //    .WithName("GetInventoryTransactions")
-        //    .Produces(StatusCodes.Status200OK)
-        //    .ProducesProblem(StatusCodes.Status404NotFound)
-        //    .WithSummary("Get inventory transactions.")
-        //    .WithDescription("Retrieve the transaction history for an inventory part.");
+        group.MapGet("/{inventoryPartId:guid}/transactions", async (Guid inventoryPartId, ISender sender) =>
+        {
+            var query = new GetInventoryTransactionsQuery(inventoryPartId);
+            var result = await sender.Send(query);
+            return Results.Ok(result);
+        })
+            .WithName("GetInventoryTransactions")
+            .Produces(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status404NotFound)
+            .WithSummary("Get inventory transactions.")
+            .WithDescription("Retrieve the transaction history for an inventory part.");
     }
 }

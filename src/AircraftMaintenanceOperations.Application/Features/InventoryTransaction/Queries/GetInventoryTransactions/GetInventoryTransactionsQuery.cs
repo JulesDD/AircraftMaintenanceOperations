@@ -1,5 +1,4 @@
 ﻿namespace AircraftMaintenanceOperations.Application.Features.InventoryTransaction.Queries.GetInventoryTransactions;
 
-internal class GetInventoryTransactionsQuery
-{
-}
+public record GetInventoryTransactionsQuery(Guid InventoryPartId) : IQuery<GetInventoryTransactionsQueryResult>;
+public record GetInventoryTransactionsQueryResult(IEnumerable<InventoryTransactionDto> InventoryTransactions);
