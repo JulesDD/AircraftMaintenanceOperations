@@ -14,14 +14,18 @@ This project is being developed incrementally using agile sprints to simulate re
 | Aircraft Management | ✅ Complete |
 | Maintenance Requests | ✅ Complete |
 | Work Orders | ✅ Complete|
-| Technician Management | 🚧 In Progress |
-| Inventory Management | 🚧 In Progress |
-| Maintenance Scheduling | 📅 Planned |
-| Authentication & Authorization | 🚧 In Progress |
+| Technician Management | ✅ Complete |
+| Inventory Management | ✅ Complete |
+| Authentication & Authorization | ✅ Complete |
+| Domain Foundation & and Inventory Hardening | 📅 Planned |
 | Kafka Messaging | 📅 Planned |
-| Unit Testing | 📅 Planned |
+| Notifications | 📅 Planned |
+| Reporting and Analytics | 📅 Planned |
+| Security & API Hardening | 📅 Planned |
+| React Frontend | 📅 Planned |
 | Docker Deployment | 📅 Planned |
 
+(Two months in and I am halfway through the project)
 ---
 
 # 🛠 Technologies
