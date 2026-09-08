@@ -57,7 +57,7 @@ public class InventoryPart : BaseEntity
 
     public bool NeedsRestock()
     {
-        return QuantityOnHand <= MinimumQuantity;
+        return QuantityOnHand < MinimumQuantity;
     }
 
     public DomainResult Consume(int quantity)

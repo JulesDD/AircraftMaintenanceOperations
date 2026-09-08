@@ -12,6 +12,8 @@
     <File Path="Sprint7.md" />
     <File Path="Sprint7Retrospective.md" />
     <File Path="Sprint8.md" />
+    <File Path="Sprint8Retrospective.md" />
+    <File Path="Sprint9.md" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/AircraftMaintenanceOperations.Tests/AircraftMaintenanceOperations.Tests.csproj" />

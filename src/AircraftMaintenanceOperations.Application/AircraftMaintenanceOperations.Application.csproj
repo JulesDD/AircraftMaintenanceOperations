@@ -7,7 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Features\InventoryTransaction\Commands\LowStockInventory\" />
     <Folder Include="Features\User\Queries\" />
   </ItemGroup>
 

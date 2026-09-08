@@ -6,5 +6,6 @@ public record InventoryDto
     string Description,
     InventoryPartType InventoryPartType,
     int Quantity,
+    int MinimumQuantity,
     string Location
 );

@@ -1,4 +1,6 @@
-﻿namespace AircraftMaintenanceOperations.API.Endpoints.Inventory;
+﻿using AircraftMaintenanceOperations.Application.Features.InventoryTransaction.Queries.LowStock;
+
+namespace AircraftMaintenanceOperations.API.Endpoints.Inventory;
 
 public class InventoryEndpoints : ICarterModule
 {
@@ -101,5 +103,17 @@ public class InventoryEndpoints : ICarterModule
             .ProducesProblem(StatusCodes.Status404NotFound)
             .WithSummary("Get inventory transactions.")
             .WithDescription("Retrieve the transaction history for an inventory part.");
+
+        group.MapGet("/low-stock", async (ISender sender) =>
+        {
+            var query = new LowStockQuery();
+            var result = await sender.Send(query);
+            return Results.Ok(result);
+        })
+            .WithName("GetLowStock")
+            .Produces(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status404NotFound)
+            .WithSummary("Get Low Stock Items")
+            .WithDescription("Retrieve all inventory parts that are at or below their minimum quantity..");
     }
 }

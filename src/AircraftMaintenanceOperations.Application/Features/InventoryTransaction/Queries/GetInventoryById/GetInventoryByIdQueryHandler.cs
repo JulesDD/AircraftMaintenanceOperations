@@ -15,6 +15,7 @@ public class GetInventoryByIdQueryHandler(IAircraftMaintenanceDbContext DbContex
             inventoryItem.Description,
             inventoryItem.Type,
             inventoryItem.QuantityOnHand,
+            inventoryItem.MinimumQuantity,
             inventoryItem.Location
         ));
     }

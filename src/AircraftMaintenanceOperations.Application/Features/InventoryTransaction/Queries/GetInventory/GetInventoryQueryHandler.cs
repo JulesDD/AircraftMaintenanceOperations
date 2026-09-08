@@ -13,6 +13,7 @@ public record GetInventoryQueryHandler(IAircraftMaintenanceDbContext DbContext) 
             i.Description,
             i.Type,
             i.QuantityOnHand,
+            i.MinimumQuantity,
             i.Location
         )));
     }
