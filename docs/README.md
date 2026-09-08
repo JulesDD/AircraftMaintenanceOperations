@@ -17,7 +17,7 @@ This project is being developed incrementally using agile sprints to simulate re
 | Technician Management | ✅ Complete |
 | Inventory Management | ✅ Complete |
 | Authentication & Authorization | ✅ Complete |
-| Domain Foundation & and Inventory Hardening | 📅 Planned |
+| Domain Foundation & and Inventory Hardening | 🚧 In Progress |
 | Kafka Messaging | 📅 Planned |
 | Notifications | 📅 Planned |
 | Reporting and Analytics | 📅 Planned |
