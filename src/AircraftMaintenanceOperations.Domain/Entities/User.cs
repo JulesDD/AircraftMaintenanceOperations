@@ -20,6 +20,7 @@ public class User : BaseEntity
     {
         return new User
         {
+            Id = Guid.NewGuid(),
             EmployeeNumber = employeeNumber,
             FirstName = firstName,
             LastName = lastName,

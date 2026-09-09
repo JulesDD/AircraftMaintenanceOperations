@@ -54,44 +54,4 @@ public class Pilot : User
         if (licenseNumber is not null)
             LicenseNumber = licenseNumber;
     }
-
-    public void StartBreak()
-    {
-        Status = EmploymentStatus.OnBreak;
-    }
-
-    public void EndBreak()
-    {
-        Status = EmploymentStatus.Active;
-    }
-
-    public void BeginMedicalLeave()
-    {
-        Status = EmploymentStatus.MedicalLeave;
-    }
-
-    public void ReturnToDuty()
-    {
-        Status = EmploymentStatus.Active;
-    }
-
-    public void StartTraining()
-    {
-        Status = EmploymentStatus.Training;
-    }
-
-    public void Suspended()
-    {
-        Status = EmploymentStatus.Suspended;
-    }
-
-    public void Retired()
-    {
-        Status = EmploymentStatus.Retired;
-    }
-
-    public void Archive()
-    {
-        Status = EmploymentStatus.Archived;
-    }
 }
