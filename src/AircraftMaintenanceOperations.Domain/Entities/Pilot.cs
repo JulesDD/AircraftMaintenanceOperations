@@ -16,6 +16,7 @@ public class Pilot : User
     {
         return new Pilot
         {
+            Id = Guid.NewGuid(),
             EmployeeNumber = employeeNumber,
             FirstName = firstName,
             LastName = lastName,

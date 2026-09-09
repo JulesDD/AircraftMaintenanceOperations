@@ -1,7 +1,4 @@
-﻿using AircraftMaintenanceOperations.Domain.Entities;
-using AircraftMaintenanceOperations.Domain.Enums;
-
-namespace AircraftMaintenanceOperations.Tests.Domain.Entities;
+﻿namespace AircraftMaintenanceOperations.Tests.Domain.Entities;
 
 [TestClass]
 public class UserTests
