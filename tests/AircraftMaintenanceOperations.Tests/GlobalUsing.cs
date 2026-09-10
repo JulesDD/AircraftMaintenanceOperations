@@ -4,3 +4,6 @@ global using AircraftMaintenanceOperations.Domain.Entities;
 global using AircraftMaintenanceOperations.Domain.Enums;
 global using AircraftMaintenanceOperations.Infrastructure.Persistence.Context;
 global using Microsoft.EntityFrameworkCore;
+global using AircraftMaintenanceOperations.Infrastructure.Authentication;
+global using Microsoft.AspNetCore.Identity;
+global using Microsoft.Extensions.DependencyInjection;
