@@ -1,4 +1,5 @@
 using AircraftMaintenanceOperations.API.Exceptions;
+using AircraftMaintenanceOperations.Application.Common.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +14,7 @@ builder.Services.AddAuthorization(opt =>
 });
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddScoped<IIdentityRoleService, IdentityRoleService>();
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
