@@ -1,4 +1,5 @@
 ﻿global using AircraftMaintenanceOperations.Application.Common.Interfaces;
+global using AircraftMaintenanceOperations.Application.Features.InventoryTransaction.Commands.ReceiveInventory;
 global using AircraftMaintenanceOperations.Application.Features.User.Commands.ChangeUserRole;
 global using AircraftMaintenanceOperations.Domain.Entities;
 global using AircraftMaintenanceOperations.Domain.Enums;
