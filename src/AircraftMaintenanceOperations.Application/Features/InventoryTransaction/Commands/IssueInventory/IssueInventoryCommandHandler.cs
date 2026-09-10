@@ -14,7 +14,8 @@ public class IssueInventoryCommandHandler(IAircraftMaintenanceDbContext DbContex
 
         var quantityBefore = inventory.QuantityOnHand;
 
-        inventory.Consume(command.Quantity);
+        var result = inventory.Consume(command.Quantity);
+        if (!result.IsSuccess) throw new InvalidOperationException(result.ErrorMessage);
 
         var quantityAfter = inventory.QuantityOnHand;
 

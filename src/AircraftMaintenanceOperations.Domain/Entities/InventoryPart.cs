@@ -29,15 +29,6 @@ public class InventoryPart : BaseEntity
         };
     }
 
-    public DomainResult ReserveStock(int quantity)
-    {
-        if (quantity <= 0) return new(false, "Quantity to reserve must be greater than zero.");
-        if (quantity > QuantityOnHand) return new(false, "Not enough quantity on hand to reserve.");
-        
-        QuantityOnHand -= quantity;
-        return new(true);
-    }
-
     public DomainResult ReceivedStock(int quantity)
     {
         if (quantity <= 0) return new(false, "Quantity received must be greater than zero.");

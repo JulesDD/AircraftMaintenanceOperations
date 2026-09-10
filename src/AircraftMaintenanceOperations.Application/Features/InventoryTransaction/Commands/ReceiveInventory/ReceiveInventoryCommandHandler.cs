@@ -9,7 +9,8 @@ public class ReceiveInventoryCommandHandler(IAircraftMaintenanceDbContext DbCont
 
         var quantityBefore = inventoryPart.QuantityOnHand;
 
-        inventoryPart.ReceivedStock(command.Quantity);
+        var result = inventoryPart.ReceivedStock(command.Quantity);
+        if (!result.IsSuccess) throw new InvalidOperationException(result.ErrorMessage);
 
         var quantityAfter = inventoryPart.QuantityOnHand;
 

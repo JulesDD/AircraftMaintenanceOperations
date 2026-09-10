@@ -8,7 +8,10 @@ public class AdjustInventoryCommandHandler(IAircraftMaintenanceDbContext DbConte
         if (inventoryPart is null) throw new InvalidOperationException($"Inventory part with ID {command.InventoryPartId} not found.");
         
         var quantityBefore = inventoryPart.QuantityOnHand;
+
         var result = inventoryPart.AdjustStock(command.Quantity);
+        if (!result.IsSuccess) throw new InvalidOperationException($"Failed to adjust inventory part with ID {command.InventoryPartId}: {result.ErrorMessage}");
+
         var quantityAfter = inventoryPart.QuantityOnHand;
 
         var inventoryTransaction = Domain.Entities.InventoryTransaction.Create(
