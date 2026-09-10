@@ -2,8 +2,12 @@
 global using AircraftMaintenanceOperations.Application.Features.User.Commands.ChangeUserRole;
 global using AircraftMaintenanceOperations.Domain.Entities;
 global using AircraftMaintenanceOperations.Domain.Enums;
-global using AircraftMaintenanceOperations.Infrastructure.Persistence.Context;
-global using Microsoft.EntityFrameworkCore;
 global using AircraftMaintenanceOperations.Infrastructure.Authentication;
+global using AircraftMaintenanceOperations.Infrastructure.Persistence.Context;
+global using Microsoft.AspNetCore.Authorization;
 global using Microsoft.AspNetCore.Identity;
+global using Microsoft.EntityFrameworkCore;
 global using Microsoft.Extensions.DependencyInjection;
+global using Microsoft.Extensions.Options;
+global using System.IdentityModel.Tokens.Jwt;
+global using System.Security.Claims;

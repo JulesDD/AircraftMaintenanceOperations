@@ -1,9 +1,4 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using AircraftMaintenanceOperations.Infrastructure.Authentication;
-using Microsoft.Extensions.Options;
-
-namespace AircraftMaintenanceOperations.Tests.Infrastructure.Authentication;
+﻿namespace AircraftMaintenanceOperations.Tests.Infrastructure.Authentication;
 
 [TestClass]
 public class JwtTokenServiceTests
