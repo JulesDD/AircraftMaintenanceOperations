@@ -1,4 +1,4 @@
-﻿namespace AircraftMaintenanceOperations.Tests.Application.Features.User.Commands.ChangeUserRole;
+﻿namespace AircraftMaintenanceOperations.Tests.Features.User.Commands;
 
 [TestClass]
 public class ChangeUserRoleCommandHandlerTests
@@ -22,7 +22,7 @@ public class ChangeUserRoleCommandHandlerTests
         var role = Role.Technician;
 
 
-        var user = global::AircraftMaintenanceOperations.Domain.Entities.User.Create(
+        var user = AircraftMaintenanceOperations.Domain.Entities.User.Create(
             employeeNumber,
             firstName,
             lastName,
@@ -118,7 +118,7 @@ public class ChangeUserRoleCommandHandlerTests
 
         await using var dbContext = new AircraftMaintenanceDbContext(options);
 
-        var user = global::AircraftMaintenanceOperations.Domain.Entities.User.Create(
+        var user = AircraftMaintenanceOperations.Domain.Entities.User.Create(
             "EMP-002",
             "Jane",
             "Smith",
@@ -157,7 +157,7 @@ public class ChangeUserRoleCommandHandlerTests
 
         await using var dbContext = new AircraftMaintenanceDbContext(options);
 
-        var user = global::AircraftMaintenanceOperations.Domain.Entities.User.Create(
+        var user = AircraftMaintenanceOperations.Domain.Entities.User.Create(
             "EMP-003",
             "Bob",
             "Jones",

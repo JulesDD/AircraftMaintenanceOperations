@@ -1,4 +1,4 @@
-﻿namespace AircraftMaintenanceOperations.Tests.Application.Features.InventoryTransaction.Commands.ReceiveInventory;
+﻿namespace AircraftMaintenanceOperations.Tests.Application.Features.InventoryTransactions.Commands;
 
 [TestClass]
 public class ReceiveInventoryCommandHandlerTests

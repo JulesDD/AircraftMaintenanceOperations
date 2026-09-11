@@ -5,7 +5,7 @@ using AircraftMaintenanceOperations.Domain.Enums;
 using AircraftMaintenanceOperations.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
-namespace AircraftMaintenanceOperations.Tests.Application.Features.InventoryTransaction.Commands.IssueInventory;
+namespace AircraftMaintenanceOperations.Tests.Application.Features.InventoryTransactions.Commands;
 
 [TestClass]
 public class IssueInventoryCommandHandlerTests
