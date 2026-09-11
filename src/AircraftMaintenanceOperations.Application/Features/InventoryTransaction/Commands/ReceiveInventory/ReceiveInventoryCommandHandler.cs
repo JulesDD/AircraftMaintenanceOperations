@@ -20,7 +20,7 @@ public class ReceiveInventoryCommandHandler(IAircraftMaintenanceDbContext DbCont
             command.Quantity,
             quantityBefore,
             quantityAfter,
-            CurrentUser.DomainUserId,
+            await CurrentUser.GetDomainUserIdAsync(cancellationToken),
             reason: command.Reason);
 
         DbContext.InventoryTransactions.Add(inventoryTransaction);

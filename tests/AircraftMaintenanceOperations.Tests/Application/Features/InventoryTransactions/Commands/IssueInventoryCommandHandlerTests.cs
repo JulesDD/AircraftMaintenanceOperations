@@ -4,6 +4,7 @@ using AircraftMaintenanceOperations.Domain.Entities;
 using AircraftMaintenanceOperations.Domain.Enums;
 using AircraftMaintenanceOperations.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using static Microsoft.ApplicationInsights.MetricDimensionNames.TelemetryContext;
 
 namespace AircraftMaintenanceOperations.Tests.Application.Features.InventoryTransactions.Commands;
 
@@ -403,14 +404,20 @@ public class IssueInventoryCommandHandlerTests
 
     private sealed class FakeCurrentUserService : ICurrentUserService
     {
-        public FakeCurrentUserService(Guid domainUserId)
+        private readonly Guid _userId;
+
+        public FakeCurrentUserService(Guid userId)
         {
-            DomainUserId = domainUserId;
+            _userId = userId;
         }
 
-        public Guid UserId => DomainUserId;
+        public Guid UserId => _userId;
 
-        public Guid DomainUserId { get; }
+        public Task<Guid> GetDomainUserIdAsync(
+            CancellationToken cancellationToken)
+        {
+            return Task.FromResult(_userId);
+        }
 
         public IReadOnlyCollection<string> Roles =>
             Array.Empty<string>();

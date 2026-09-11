@@ -34,7 +34,7 @@ public class IssueInventoryCommandHandler(IAircraftMaintenanceDbContext DbContex
             command.Quantity,
             quantityBefore,
             quantityAfter,
-            CurrentUser.DomainUserId,
+            await CurrentUser.GetDomainUserIdAsync(cancellationToken),
             workOrderId: workOrder.Id,
             reason: command.Reason);
         

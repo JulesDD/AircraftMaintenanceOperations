@@ -39,6 +39,7 @@ global using AircraftMaintenanceOperations.Application.Features.WorkOrders.Comma
 global using AircraftMaintenanceOperations.Application.Features.WorkOrders.Queries.GetWorkOrderByIdQuery;
 global using AircraftMaintenanceOperations.Application.Features.WorkOrders.Queries.GetWorkOrderQuery;
 global using AircraftMaintenanceOperations.Domain.Enums;
+global using AircraftMaintenanceOperations.Domain.Exceptions;
 global using AircraftMaintenanceOperations.Infrastructure.Authentication;
 global using AircraftMaintenanceOperations.Infrastructure.Extensions;
 global using AircraftMaintenanceOperations.Infrastructure.Persistence.Context;
@@ -49,4 +50,5 @@ global using Microsoft.AspNetCore.Diagnostics;
 global using Microsoft.AspNetCore.Identity;
 global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.OpenApi.Models;
+global using System.ComponentModel.DataAnnotations;
 global using System.Reflection;

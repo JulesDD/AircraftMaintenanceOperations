@@ -3,6 +3,6 @@
 public interface ICurrentUserService
 {
     Guid UserId { get; }
-    Guid DomainUserId { get; }
+    Task<Guid> GetDomainUserIdAsync(CancellationToken cancellationToken);
     IReadOnlyCollection<string> Roles { get; }
 }

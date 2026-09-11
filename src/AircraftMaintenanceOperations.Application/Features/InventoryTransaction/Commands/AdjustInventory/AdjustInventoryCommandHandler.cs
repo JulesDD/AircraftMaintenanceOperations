@@ -20,7 +20,7 @@ public class AdjustInventoryCommandHandler(IAircraftMaintenanceDbContext DbConte
             Math.Abs(command.Quantity),
             quantityBefore,
             quantityAfter,
-            CurrentUser.DomainUserId,
+            await CurrentUser.GetDomainUserIdAsync(cancellationToken),
             workOrderId: null,
             reason: command.Notes);
 
