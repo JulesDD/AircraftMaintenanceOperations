@@ -1,16 +1,9 @@
 ﻿namespace AircraftMaintenanceOperations.API.Endpoints.Aircraft;
 
-public record UpdateAircraftRequest(
-    string? currentAirport,
-    double flightHours,
-    DateTime lastMaintenanceDate,
-    DateTime nextMaintenanceDate);
-public record AssignPilotRequest(Guid PilotId);
 public record CreateAircraftResponse(Guid Id);
 public record GetAircraftResult(IEnumerable<AircraftDto> Aircraft);
 public record GetAircraftByIdResponse(AircraftDto Aircraft);
 public record ArchiveAircraftResponse(Guid Id, bool IsArchived);
-
 public record ArchiveAircraftRequest(Guid Id, bool IsArchived);
 
 
@@ -58,16 +51,10 @@ public class AircraftEndpoints : ICarterModule
             .WithSummary("Gets aircraft by Id.")
             .WithDescription("Get aircraft by Id.");
 
-        group.MapPatch("/{id:guid}", async(Guid id, UpdateAircraftRequest request, ISender sender) =>
+        group.MapPatch("/{id:guid}", async(Guid id, UpdateAircraftCommand command, ISender sender) =>
         {
-            var command = new UpdateAircraftCommand(
-                id,
-                request.currentAirport,
-                request.flightHours,
-                request.lastMaintenanceDate,
-                request.nextMaintenanceDate);
-
-            return Results.Ok(await sender.Send(command));
+            var update = command with { Id = id };
+            return Results.Ok(await sender.Send(update));
         })
             .WithName("UpdateAircraft")
             .Produces<UpdateAircraftResult>(StatusCodes.Status200OK)
@@ -87,11 +74,11 @@ public class AircraftEndpoints : ICarterModule
             .WithSummary("Archive Aircraft.")
             .WithDescription("Archive Aircraft");
 
-        group.MapPatch("/{id:guid}/assign-pilot", async (Guid id, AssignPilotRequest request, ISender sender) =>
+        group.MapPatch("/{id:guid}/assign-pilot", async (Guid id, AssignPilotCommand command, ISender sender) =>
         {
-            var pilotCommand = new AssignPilotCommand(id,request.PilotId);
-            var assignPilot = await sender.Send(pilotCommand);
-            return Results.Ok(assignPilot);
+            var assign = command with { AircraftId = id };
+            var result = await sender.Send(assign);
+            return Results.Ok(result);
         })
             .WithName("AssignPilot")
             .Produces<AssignPilotResult>(StatusCodes.Status200OK)

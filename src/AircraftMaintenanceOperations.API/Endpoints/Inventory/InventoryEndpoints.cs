@@ -21,8 +21,8 @@ public class InventoryEndpoints : ICarterModule
 
         group.MapPost("/{inventoryPartId}/receive", async(Guid inventoryPartId, ReceiveInventoryCommand command, ISender sender) =>
         {
-            var rInventory = new ReceiveInventoryCommand(inventoryPartId, command.Quantity, command.Reason);
-            var result = await sender.Send(rInventory);
+            var receive = command with { InventoryPartId = inventoryPartId };
+            var result = await sender.Send(receive);
             return Results.Created($"/api/inventory/{inventoryPartId}/transactions/{result.Id}", result);
         })
             .WithName("ReceiveInventory")
@@ -34,13 +34,8 @@ public class InventoryEndpoints : ICarterModule
 
         group.MapPost("/{inventoryPartId}/issue", async(Guid inventoryPartId, Guid workOrderId, IssueInventoryCommand command, ISender sender) =>
         {
-            var iInventory = new IssueInventoryCommand(
-                inventoryPartId,
-                workOrderId,
-                command.Quantity,
-                command.Reason);
-
-            var result = await sender.Send(iInventory);
+            var issue = command with { InventoryPartId = inventoryPartId, WorkOrderId = workOrderId };
+            var result = await sender.Send(issue);
             return Results.Created($"/api/inventory/{inventoryPartId}/transactions/{result.Id}", result);
         })
         .WithName("IssueInventory")
@@ -52,12 +47,8 @@ public class InventoryEndpoints : ICarterModule
 
         group.MapPost("/{inventoryPartId}/adjust", async (Guid inventoryPartId, AdjustInventoryCommand command, ISender sender) => {
             
-            var aInventory = new AdjustInventoryCommand(
-                inventoryPartId,
-                command.Quantity, 
-                command.Notes);
-
-            var result = await sender.Send(aInventory);
+            var adjust = command with { InventoryPartId = inventoryPartId };
+            var result = await sender.Send(adjust);
             return Results.Created($"/api/inventory/{inventoryPartId}/transactions/{result.Id}", result);
         })
             .WithName("AdjustInventory")

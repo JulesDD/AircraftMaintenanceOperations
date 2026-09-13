@@ -47,14 +47,8 @@ public class WorkOrderEndpoints : ICarterModule
 
         group.MapPatch("/{id:guid}", async (Guid id, UpdateWorkOrderCommand request, ISender sender) =>
         {
-            var command = new UpdateWorkOrderCommand(
-                id,
-                request.Title,
-                request.Description,
-                request.WorkOrderPriority,
-                request.EstimatedCompletionDate);
-            var result = await sender.Send(command);
-            return Results.Ok(result);
+            var update = request with { WorkOrderId = id };
+        return Results.Ok(await sender.Send(update));
         })
             .WithName("UpdateWorkOrder")
             .Produces<UpdateWorkOrderResult>(StatusCodes.Status200OK)
@@ -76,8 +70,8 @@ public class WorkOrderEndpoints : ICarterModule
 
         group.MapPatch("/{id:guid}/assign-technician", async (Guid id, AssignTechnicianCommand request, ISender sender) =>
         {
-            var command = new AssignTechnicianCommand(id, request.TechnicianId, request.LaborNotes);
-            var result = await sender.Send(command);
+            var assign = request with { WorkOrderId = id };
+            var result = await sender.Send(assign);
             return Results.Ok(result);
         })
             .WithName("AssignTechnicianToWorkOrder")
@@ -88,8 +82,8 @@ public class WorkOrderEndpoints : ICarterModule
 
         group.MapPatch("/{id:guid}/in-progress", async (Guid id, InProgressCommand request, ISender sender) =>
         { 
-            var command = new InProgressCommand(id, request.TechnicianId, request.LaborNotes);
-            var result = await sender.Send(command);
+            var update = request with { WorkOrderId = id };
+            var result = await sender.Send(update);
             return Results.Ok(result);
         })
             .WithName("WorkOrderInProgress")

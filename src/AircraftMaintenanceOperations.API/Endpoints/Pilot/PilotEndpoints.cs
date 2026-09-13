@@ -1,12 +1,5 @@
 ﻿namespace AircraftMaintenanceOperations.API.Endpoints.Pilot;
 
-public record UpdatePilotRequest(
-    string? FirstName,
-    string? LastName,
-    string? Email,
-    string? PhoneNumber,
-    string? Rank,
-    string? LicenseNumber);
 public record CreatePilotResponse(Guid Id);
 public record GetPilotByIdResponse(PilotDto Pilot);
 public record UpdatePilotCommandResult(bool IsSuccess);
@@ -68,19 +61,12 @@ public class PilotEndpoints : ICarterModule
             .WithSummary("Archive Pilot.")
             .WithDescription("Archive Pilot");
 
-        group.MapPatch("/{id:guid}", async (Guid id,UpdatePilotRequest request, ISender sender) =>
+        group.MapPatch("/{id:guid}", async (Guid id, UpdatePilotCommand command, ISender sender) =>
         {
 
-            var command = new UpdatePilotCommand(
-                id,
-                request.FirstName, 
-                request.LastName,
-                request.PhoneNumber,
-                request.Email,
-                request.Rank,
-                request.LicenseNumber);
+            var update = command with { Id = id };
             
-            return Results.Ok(await sender.Send(command));
+            return Results.Ok(await sender.Send(update));
         })
             .WithName("UpdatePilot")
             .Produces<UpdatePilotCommandResult>(StatusCodes.Status200OK)

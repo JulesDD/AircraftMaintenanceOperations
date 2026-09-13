@@ -32,6 +32,8 @@ global using AircraftMaintenanceOperations.Application.Features.Technician.Comma
 global using AircraftMaintenanceOperations.Application.Features.Technician.Commands.UpdateTechnician;
 global using AircraftMaintenanceOperations.Application.Features.Technician.Queries.GetTechnician;
 global using AircraftMaintenanceOperations.Application.Features.Technician.Queries.GetTechnicianById;
+global using AircraftMaintenanceOperations.Application.Features.User.Commands.ChangeUserRole;
+global using AircraftMaintenanceOperations.Application.Features.User.Commands.CreateUser;
 global using AircraftMaintenanceOperations.Application.Features.WorkOrders.Command.ArchiveWorkOrderCommand;
 global using AircraftMaintenanceOperations.Application.Features.WorkOrders.Command.AssignTechnicianCommand;
 global using AircraftMaintenanceOperations.Application.Features.WorkOrders.Command.CreateWorkOrderCommand;

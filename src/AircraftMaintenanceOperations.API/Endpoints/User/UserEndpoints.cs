@@ -1,10 +1,5 @@
-﻿using AircraftMaintenanceOperations.Application.Features.User.Commands.ChangeUserRole;
-using AircraftMaintenanceOperations.Application.Features.User.Commands.CreateUser;
+﻿namespace AircraftMaintenanceOperations.API.Endpoints.User;
 
-namespace AircraftMaintenanceOperations.API.Endpoints.User;
-
-
-public record ChangeUserRoleRequest(Role NewRole);
 public class UserEndpoints : ICarterModule
 {
     public void AddRoutes(IEndpointRouteBuilder app)
@@ -22,11 +17,10 @@ public class UserEndpoints : ICarterModule
             .WithSummary("Created User.")
             .WithDescription("Create User.");
 
-        group.MapPut("/{UserId:guid}/role", async (Guid userId, ChangeUserRoleRequest request, ISender sender) =>
+        group.MapPut("/{UserId:guid}/role", async (Guid userId, ChangeUserRoleCommand command, ISender sender) =>
         {
-            var command = new ChangeUserRoleCommand(userId, request.NewRole);
-
-            var result = await sender.Send(command);
+            var update = command with { UserId = userId };
+            var result = await sender.Send(update);
             return Results.Ok(result);
         })
             .WithName("ChangeUserRole")

@@ -54,12 +54,8 @@ public class MaintenanceEndpoints : ICarterModule
 
         group.MapPatch("/{id:guid}", async(Guid id, UpdateMaintenanceCommand command, ISender sender) =>
         {
-            var updateCommand = new UpdateMaintenanceCommand(
-                id,
-                command.Title,
-                command.Description,
-                command.DueDate);
-            return Results.Ok(await sender.Send(updateCommand));
+            var update = command with { Id = id };
+            return Results.Ok(await sender.Send(update));
         })
             .WithName("UpdateMaintenance")
             .Produces<UpdateMaintenanceResult>(StatusCodes.Status200OK)

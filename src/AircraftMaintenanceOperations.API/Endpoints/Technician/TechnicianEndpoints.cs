@@ -44,16 +44,7 @@ public class TechnicianEndpoints : ICarterModule
 
         group.MapPatch("/{id:guid}", async (Guid id, UpdateTechnicianCommand command, ISender sender) =>
         {
-            var update = new UpdateTechnicianCommand
-            (
-                id,
-                command.FirstName,
-                command.LastName,
-                command.PhoneNumber,
-                command.Email,
-                command.CertificationLevel,
-                command.YearsOfExperience
-            );
+            var update = command with { TechnicianId = id };
 
             return Results.Ok(await sender.Send(update));
         })
