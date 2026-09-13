@@ -1,13 +1,5 @@
 ﻿namespace AircraftMaintenanceOperations.API.Endpoints.Aircraft;
 
-public record CreateAircraftResponse(Guid Id);
-public record GetAircraftResult(IEnumerable<AircraftDto> Aircraft);
-public record GetAircraftByIdResponse(AircraftDto Aircraft);
-public record ArchiveAircraftResponse(Guid Id, bool IsArchived);
-public record ArchiveAircraftRequest(Guid Id, bool IsArchived);
-
-
-
 public class AircraftEndpoints : ICarterModule
 {
     public void AddRoutes(IEndpointRouteBuilder app)
@@ -18,10 +10,10 @@ public class AircraftEndpoints : ICarterModule
         {
             var result = await sender.Send(command);
 
-            return Results.Created($"/{result.AircraftId}", new CreateAircraftResponse(result.AircraftId));
+            return Results.Created($"/{result.AircraftId}", new CreateAircraftCommandResult(result.AircraftId));
         })
             .WithName("CreateAircraft")
-            .Produces<CreateAircraftResponse>(StatusCodes.Status201Created)
+            .Produces<CreateAircraftCommandResult>(StatusCodes.Status201Created)
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .WithSummary("Creates a new aircraft.")
             .WithDescription("Create Aircraft");
@@ -42,11 +34,11 @@ public class AircraftEndpoints : ICarterModule
         {
             var query = new GetAircraftByIdQuery(id);
             var result = await sender.Send(query);
-            var response = result.Adapt<GetAircraftByIdResponse>();
+            var response = result.Adapt<GetAircraftByIdQueryResult>();
             return Results.Ok(response);
         })
             .WithName("GetAircraftById")
-            .Produces<GetAircraftByIdResponse>(StatusCodes.Status200OK)
+            .Produces<GetAircraftByIdQueryResult>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .WithSummary("Gets aircraft by Id.")
             .WithDescription("Get aircraft by Id.");
@@ -69,7 +61,7 @@ public class AircraftEndpoints : ICarterModule
             return Results.Ok(result);
         })
             .WithName("ArchiveAircraft")
-            .Produces<ArchiveAircraftResponse>(StatusCodes.Status200OK)
+            .Produces<ArchiveAircraftResult>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .WithSummary("Archive Aircraft.")
             .WithDescription("Archive Aircraft");

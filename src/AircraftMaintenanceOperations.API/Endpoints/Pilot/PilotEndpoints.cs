@@ -1,11 +1,5 @@
 ﻿namespace AircraftMaintenanceOperations.API.Endpoints.Pilot;
 
-public record CreatePilotResponse(Guid Id);
-public record GetPilotByIdResponse(PilotDto Pilot);
-public record UpdatePilotCommandResult(bool IsSuccess);
-
-
-
 public class PilotEndpoints : ICarterModule
 {
     public void AddRoutes(IEndpointRouteBuilder app)
@@ -16,10 +10,10 @@ public class PilotEndpoints : ICarterModule
         {
             var result = await sender.Send(command);
 
-            return Results.Created($"/{result.Id}", new CreatePilotResponse(result.Id));
+            return Results.Created($"/{result.Id}", new CreatePilotCommandResult(result.Id));
         })
             .WithName("CreatePilot")
-            .Produces<CreatePilotResponse>(StatusCodes.Status201Created)
+            .Produces<CreatePilotCommandResult>(StatusCodes.Status201Created)
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .WithSummary("Created a new Pilot.")
             .WithDescription("Create Pilot");
@@ -40,11 +34,11 @@ public class PilotEndpoints : ICarterModule
         {
             var query = new GetPilotByIdQuery(id);
             var result = await sender.Send(query);
-            var response = result.Adapt<GetPilotByIdResponse>();
+            var response = result.Adapt<GetPilotByIdQueryResult>();
             return Results.Ok(response);
         })
             .WithName("GetPilotById")
-            .Produces<GetPilotByIdResponse>(StatusCodes.Status200OK)
+            .Produces<GetPilotByIdQueryResult>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .WithSummary("Gets pilot by Id.")
             .WithDescription("Get pilot by Id.");
@@ -69,7 +63,7 @@ public class PilotEndpoints : ICarterModule
             return Results.Ok(await sender.Send(update));
         })
             .WithName("UpdatePilot")
-            .Produces<UpdatePilotCommandResult>(StatusCodes.Status200OK)
+            .Produces<UpdatePilotResult>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .WithSummary("Update Pilot.")
             .WithDescription("Update Pilot");
