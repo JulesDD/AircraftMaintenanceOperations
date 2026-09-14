@@ -9,7 +9,7 @@ public class MaintenanceRequest : BaseEntity
     public MaintenancePriority MaintenancePriority { get; set; }
     public MaintenanceRequestStatus MaintenanceRequestStatus { get; private set; }
     public Aircraft Aircraft { get; private set; }
-    public string RequestedBy { get; set; }
+    public Guid RequestedBy { get; set; }
     public DateTime RequestedDate { get; set; }
     public DateTime DueDate { get; set; }
     public DateTime ClosedDate { get; set; }
@@ -19,7 +19,7 @@ public class MaintenanceRequest : BaseEntity
         string title,
         Guid aircraftId,
         string description,
-        string requestedBy,
+        Guid requestedBy,
         DateTime dueDate)
     {
         if (dueDate < DateTime.UtcNow) throw new InvalidOperationException("Due date cannot be in the past.");

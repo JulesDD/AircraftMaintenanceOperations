@@ -14,6 +14,7 @@ public class WorkOrderEndpoints : ICarterModule
             return Results.Created($"/api/workorders/{result.Id}", result);
         })
             .WithName("CreateWorkOrder")
+            .RequireAuthorization("Supervisor")
             .Produces<CreatedWorkOrderResult>(StatusCodes.Status201Created)
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .WithSummary("Creates a new work order.")
@@ -51,6 +52,7 @@ public class WorkOrderEndpoints : ICarterModule
         return Results.Ok(await sender.Send(update));
         })
             .WithName("UpdateWorkOrder")
+            .RequireAuthorization("Supervisor")
             .Produces<UpdateWorkOrderResult>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .WithSummary("Updates an existing work order.")
@@ -75,6 +77,7 @@ public class WorkOrderEndpoints : ICarterModule
             return Results.Ok(result);
         })
             .WithName("AssignTechnicianToWorkOrder")
+            .RequireAuthorization("Supervisor")
             .Produces<AssignTechnicianResult>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .WithSummary("Assigns a technician to a work order.")

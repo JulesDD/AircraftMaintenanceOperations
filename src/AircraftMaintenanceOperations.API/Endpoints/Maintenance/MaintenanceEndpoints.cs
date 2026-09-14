@@ -5,7 +5,7 @@ namespace AircraftMaintenanceOperations.API.Endpoints.Maintenance;
 
 public record GetMaintenanceParameters(
     string? RequestNumber,
-    string? RequestedBy,
+    Guid? RequestedBy,
     MaintenanceRequestStatus? Status,
     MaintenancePriority? Priority);
 
@@ -14,7 +14,7 @@ public class MaintenanceEndpoints : ICarterModule
 {
     public void AddRoutes(IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("/api/maintenance").WithTags("Maintenance").RequireAuthorization("Supervisor");
+        var group = app.MapGroup("/api/maintenance").WithTags("Maintenance").RequireAuthorization();
 
         group.MapPost("/", async(CreateMaintenanceCommand command, ISender sender) =>
         {
@@ -22,6 +22,7 @@ public class MaintenanceEndpoints : ICarterModule
             return Results.Created($"/api/maintenance/{result.Id}", result);
         })
             .WithName("CreateMaintenance")
+            .RequireAuthorization("MaintenanceRequestAccess")
             .Produces<CreatedMaintenanceResult>(StatusCodes.Status201Created)
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .WithSummary("Creates a new maintenance record.")
@@ -36,6 +37,7 @@ public class MaintenanceEndpoints : ICarterModule
             return Results.Ok(result);
         })
             .WithName("GetMaintenance")
+            .RequireAuthorization("Supervisor")
             .Produces<GetMaintenanceResult>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status404NotFound)
             .WithSummary("Retrieves all maintenance records.")
@@ -47,6 +49,7 @@ public class MaintenanceEndpoints : ICarterModule
             return Results.Ok(result);
         })
             .WithName("GetMaintenanceById")
+            .RequireAuthorization("MaintenanceRequestAccess")
             .Produces<GetMaintenanceQueryByIdResult>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status404NotFound)
             .WithSummary("Retrieves a specific maintenance record.")
@@ -58,6 +61,7 @@ public class MaintenanceEndpoints : ICarterModule
             return Results.Ok(await sender.Send(update));
         })
             .WithName("UpdateMaintenance")
+            .RequireAuthorization("Supervisor")
             .Produces<UpdateMaintenanceResult>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status404NotFound)
             .WithSummary("Updates an existing maintenance record.")
@@ -69,6 +73,7 @@ public class MaintenanceEndpoints : ICarterModule
             return Results.Ok(result);
         })
             .WithName("ArchiveMaintenance")
+            .RequireAuthorization("Supervisor")
             .Produces<ArchiveMaintenanceResult>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status404NotFound)
             .WithSummary("Archives an existing maintenance record.")
@@ -80,6 +85,7 @@ public class MaintenanceEndpoints : ICarterModule
             return Results.Ok(result);
         })
             .WithName("StartMaintenance")
+            .RequireAuthorization("Supervisor")
             .Produces<StartMaintenanceResult>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status404NotFound)
             .WithSummary("Starts an existing maintenance record.")
@@ -92,6 +98,7 @@ public class MaintenanceEndpoints : ICarterModule
             return Results.Ok(result);
         })
             .WithName("GetMaintenanceTasks")
+            .RequireAuthorization("MaintenanceHistoryAccess")
             .Produces<GetMaintenanceTaskQueryResult>(StatusCodes.Status200OK)
             .WithSummary("Retrieves the maintenance task queue.")
             .WithDescription("Retrieves active maintenance requests and work orders.");

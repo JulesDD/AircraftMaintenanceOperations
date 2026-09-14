@@ -6,7 +6,7 @@ public record MaintenanceRequestDto
     string Title,
     string Description,
     Guid AircraftId,
-    string RequestedBy,
+    Guid RequestedBy,
     MaintenancePriority MaintenancePriority,
     MaintenanceRequestStatus MaintenanceStatus,
     DateTime DueDate,

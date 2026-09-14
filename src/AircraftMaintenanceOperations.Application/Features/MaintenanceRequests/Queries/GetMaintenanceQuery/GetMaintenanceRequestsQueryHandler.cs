@@ -4,12 +4,12 @@ public record GetMaintenanceRequestsQueryHandler(IAircraftMaintenanceDbContext d
 {
     public async Task<GetMaintenanceResult> Handle(GetMaintenanceRequestsQuery query, CancellationToken cancellationToken)
     {
-
         var mQuery = dbContext.MaintenanceRequests.AsNoTracking();
-        if(!string.IsNullOrWhiteSpace(query.RequestedBy)) mQuery = mQuery.Where(mq => mq.RequestedBy == query.RequestedBy);
-        if(query.Status.HasValue) mQuery = mQuery.Where(mq => mq.MaintenanceRequestStatus == query.Status);
-        if(query.Priority.HasValue) mQuery = mQuery.Where(mq => mq.MaintenancePriority == query.Priority);
 
+        if (query.RequestedBy.HasValue) mQuery = mQuery.Where(mq => mq.RequestedBy == query.RequestedBy.Value);
+        if (query.Status.HasValue) mQuery = mQuery.Where(mq => mq.MaintenanceRequestStatus == query.Status);
+        if (query.Priority.HasValue) mQuery = mQuery.Where(mq => mq.MaintenancePriority == query.Priority);
+            
         // project the results to DTO
         var maintenanceRequests = await mQuery
             .Select(mq => new MaintenanceRequestDto

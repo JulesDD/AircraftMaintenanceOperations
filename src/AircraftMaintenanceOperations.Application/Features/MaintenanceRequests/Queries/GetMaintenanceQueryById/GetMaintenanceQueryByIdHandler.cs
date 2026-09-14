@@ -1,17 +1,20 @@
 ﻿namespace AircraftMaintenanceOperations.Application.Features.MaintenanceRequests.Queries.GetMaintenanceQueryById;
 
-public record GetMaintenanceQueryByIdHandler(IAircraftMaintenanceDbContext dbContext, INumberGenerator numberGenerator) : IQueryHandler<GetMaintenanceQueryById, GetMaintenanceQueryByIdResult>
+public record GetMaintenanceQueryByIdHandler(IAircraftMaintenanceDbContext DbContext, ICurrentUserService CurrentUserService) : IQueryHandler<GetMaintenanceQueryById, GetMaintenanceQueryByIdResult>
 {
     public async Task<GetMaintenanceQueryByIdResult> Handle(GetMaintenanceQueryById query, CancellationToken cancellationToken)
     {
-        var requestNumber = await numberGenerator.GenerateMaintenanceRequestNumberAsync();
+        var domainUserId = await CurrentUserService.GetDomainUserIdAsync(cancellationToken);
 
-        var mQuery = await dbContext.MaintenanceRequests
+        var mQuery = await DbContext.MaintenanceRequests
             .Where(mq => mq.Id == query.MaintenanceRequestId)
             .FirstOrDefaultAsync(cancellationToken);
 
+        var isPilot = CurrentUserService.Roles.Contains("Pilot");
+        if (isPilot && mQuery is not null && mQuery.RequestedBy != domainUserId) throw new ForbiddenException("You are not authorized to access this maintenance request.");
+
         return new GetMaintenanceQueryByIdResult(mQuery == null ? null : new MaintenanceRequestDto(
-            requestNumber,
+            mQuery.RequestNumber,
             mQuery.Title,
             mQuery.Description,
             mQuery.AircraftId,
