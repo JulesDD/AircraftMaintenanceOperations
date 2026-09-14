@@ -1,6 +1,4 @@
-﻿using AircraftMaintenanceOperations.Application.Features.InventoryTransaction.Queries.LowStock;
-
-namespace AircraftMaintenanceOperations.API.Endpoints.Inventory;
+﻿namespace AircraftMaintenanceOperations.API.Endpoints.Inventory;
 
 public class InventoryEndpoints : ICarterModule
 {

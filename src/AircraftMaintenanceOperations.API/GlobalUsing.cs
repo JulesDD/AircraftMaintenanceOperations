@@ -14,6 +14,7 @@ global using AircraftMaintenanceOperations.Application.Features.InventoryTransac
 global using AircraftMaintenanceOperations.Application.Features.InventoryTransaction.Queries.GetInventory;
 global using AircraftMaintenanceOperations.Application.Features.InventoryTransaction.Queries.GetInventoryById;
 global using AircraftMaintenanceOperations.Application.Features.InventoryTransaction.Queries.GetInventoryTransactions;
+global using AircraftMaintenanceOperations.Application.Features.InventoryTransaction.Queries.LowStock;
 global using AircraftMaintenanceOperations.Application.Features.Login.Commands.CreateLogin;
 global using AircraftMaintenanceOperations.Application.Features.MaintenanceRequests.Commands.ArchiveMaintenanceRequest;
 global using AircraftMaintenanceOperations.Application.Features.MaintenanceRequests.Commands.CreatedMaintenanceRequest;
@@ -37,6 +38,7 @@ global using AircraftMaintenanceOperations.Application.Features.User.Commands.Cr
 global using AircraftMaintenanceOperations.Application.Features.WorkOrders.Command.ArchiveWorkOrderCommand;
 global using AircraftMaintenanceOperations.Application.Features.WorkOrders.Command.AssignTechnicianCommand;
 global using AircraftMaintenanceOperations.Application.Features.WorkOrders.Command.CreateWorkOrderCommand;
+global using AircraftMaintenanceOperations.Application.Features.WorkOrders.Command.InProgressCommand;
 global using AircraftMaintenanceOperations.Application.Features.WorkOrders.Command.UpdateWorkOrderCommand;
 global using AircraftMaintenanceOperations.Application.Features.WorkOrders.Queries.GetWorkOrderByIdQuery;
 global using AircraftMaintenanceOperations.Application.Features.WorkOrders.Queries.GetWorkOrderQuery;

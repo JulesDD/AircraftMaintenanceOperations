@@ -7,6 +7,7 @@ public record GetWorkOrderByIdQueryHandler(IAircraftMaintenanceDbContext DbConte
         var domainUserId = await CurrentUser.GetDomainUserIdAsync(cancellationToken);
 
         var order = await DbContext.WorkOrders
+            .AsNoTracking()
             .Where(wo => wo.Id == query.WorkOrderId)
             .Where(wo => CurrentUser.Roles.Contains("Admin") || CurrentUser.Roles.Contains("MaintenanceSupervisor") || wo.AssignedTechnicianId == domainUserId)
             .FirstOrDefaultAsync(cancellationToken);

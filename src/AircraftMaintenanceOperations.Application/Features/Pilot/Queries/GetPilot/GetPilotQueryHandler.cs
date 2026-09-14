@@ -5,6 +5,7 @@ public record GetPilotQueryHandler(IAircraftMaintenanceDbContext dbContext) : IQ
     public async Task<GetPilotResult> Handle(GetPilotQuery query, CancellationToken cancellationToken)
     {
         var pilots = await dbContext.Pilots
+            .AsNoTracking()
             .OrderBy(p => p.Rank) 
             .ToListAsync(cancellationToken);
 

@@ -5,6 +5,7 @@ public record GetAircraftQueryHandler(IAircraftMaintenanceDbContext DbContext) :
     public async Task<GetAircraftResult> Handle(GetAircraftQuery query, CancellationToken cancellationToken)
     {
         var aircrafts = await DbContext.Aircrafts
+            .AsNoTracking()
             .OrderBy(a => a.TailNumber)
             .ToListAsync(cancellationToken);
 

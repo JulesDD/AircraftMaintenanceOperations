@@ -5,6 +5,7 @@ public record GetInventoryQueryHandler(IAircraftMaintenanceDbContext DbContext) 
     public async Task<GetInventoryQueryResult> Handle(GetInventoryQuery query, CancellationToken cancellationToken)
     {
         var inventoryItems = await DbContext.InventoryParts
+            .AsNoTracking()
             .OrderBy(i => i.PartNumber)
             .ToListAsync(cancellationToken);
         

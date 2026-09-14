@@ -5,6 +5,7 @@ public record GetWorkOrderQueryHandler(IAircraftMaintenanceDbContext DbContext) 
     public async Task<GetWorkOrderQueryResult> Handle(GetWorkOrderQuery request, CancellationToken cancellationToken)
     {
         var order = await DbContext.WorkOrders
+            .AsNoTracking()
             .OrderBy(wo => wo.WorkOrderNumber)
             .ToListAsync(cancellationToken);
 

@@ -1,6 +1,4 @@
-﻿using AircraftMaintenanceOperations.Application.Features.WorkOrders.Command.InProgressCommand;
-
-namespace AircraftMaintenanceOperations.API.Endpoints.WorkOrder;
+﻿namespace AircraftMaintenanceOperations.API.Endpoints.WorkOrder;
 
 public class WorkOrderEndpoints : ICarterModule
 {
