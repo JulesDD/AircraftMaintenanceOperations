@@ -4,7 +4,7 @@ public class TechnicianEndpoints : ICarterModule
 {
     public void AddRoutes(IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("/api/technicians").WithTags("Technicians");
+        var group = app.MapGroup("/api/technicians").WithTags("Technicians").RequireAuthorization("Supervisor");
 
         group.MapPost("/", async (CreateTechnicianCommand command, ISender sender) =>
         {

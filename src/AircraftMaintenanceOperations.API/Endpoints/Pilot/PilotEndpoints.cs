@@ -4,7 +4,7 @@ public class PilotEndpoints : ICarterModule
 {
     public void AddRoutes(IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("/api/pilot").WithTags("Pilot");
+        var group = app.MapGroup("/api/pilot").WithTags("Pilot").RequireAuthorization("Supervisor");
 
         group.MapPost("/", async(CreatePilotCommand command, ISender sender) => 
         {

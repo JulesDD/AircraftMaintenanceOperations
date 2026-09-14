@@ -4,7 +4,7 @@ public class AircraftEndpoints : ICarterModule
 {
     public void AddRoutes(IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("/api/aircraft").WithTags("Aircraft");
+        var group = app.MapGroup("/api/aircraft").WithTags("Aircraft").RequireAuthorization("Supervisor");
 
         group.MapPost("/", async(CreateAircraftCommand command, ISender sender) =>
         {
