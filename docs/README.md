@@ -1,8 +1,8 @@
-# ✈️ Airport Maintenance Operations API
+# ✈️ Aircraft Maintenance Operations API
 
-A modern **ASP.NET Core (.NET 8)** backend application built using **Clean Architecture**, **CQRS**, and **Domain-Driven Design (DDD)** principles to manage aircraft, pilots, and maintenance operations.
+A modern **ASP.NET Core (.NET 8)** backend application built using **Clean Architecture**, **CQRS**, and **Domain-Driven Design (DDD)** principles to manage aircraft, pilots, technicians, maintenance requests, work orders, and inventory operations.
 
-This project is being developed incrementally using agile sprints to simulate real-world enterprise software development practices.
+The project is developed incrementally using agile sprints to simulate real-world enterprise backend development practices.
 
 ---
 
@@ -13,11 +13,13 @@ This project is being developed incrementally using agile sprints to simulate re
 | Pilot Management | ✅ Complete |
 | Aircraft Management | ✅ Complete |
 | Maintenance Requests | ✅ Complete |
-| Work Orders | ✅ Complete|
+| Work Orders | ✅ Complete |
 | Technician Management | ✅ Complete |
 | Inventory Management | ✅ Complete |
 | Authentication & Authorization | ✅ Complete |
-| Domain Foundation & and Inventory Hardening | 🚧 In Progress |
+| Employee / User / Role / Profile Foundation | ✅ Complete |
+| Inventory Hardening | ✅ Complete |
+| Sprint 9 Technical Debt Cleanup | ✅ Complete |
 | Kafka Messaging | 📅 Planned |
 | Notifications | 📅 Planned |
 | Reporting and Analytics | 📅 Planned |
@@ -25,7 +27,8 @@ This project is being developed incrementally using agile sprints to simulate re
 | React Frontend | 📅 Planned |
 | Docker Deployment | 📅 Planned |
 
-(Two months in and I am halfway through the project)
+**Current Sprint: Sprint 9 — Complete**
+
 ---
 
 # 🛠 Technologies
@@ -40,82 +43,188 @@ This project is being developed incrementally using agile sprints to simulate re
 - Mapster
 - Swagger / OpenAPI
 - Minimal APIs
-- Kafka
+- Docker
+- Kafka (planned)
+
+---
+
+# 🏗 Architecture
+
+The solution follows a layered Clean Architecture structure:
+
+```text
+src/
+├── AircraftMaintenanceOperations.Domain
+├── AircraftMaintenanceOperations.Application
+├── AircraftMaintenanceOperations.Infrastructure
+└── AircraftMaintenanceOperations.API
+```
+
+### Domain
+
+Contains entities, enums, domain behavior, and domain-facing abstractions.
+
+The current domain foundation includes:
+
+```text
+User
+├── EmployeeNumber
+├── FirstName
+├── LastName
+├── Email
+├── PhoneNumber
+├── Role
+└── EmploymentStatus
+
+Pilot : User
+├── Rank
+└── LicenseNumber
+
+Technician : User
+├── CertificationLevel
+└── YearsOfExperience
+```
+
+`User` owns employment lifecycle information. Specialized Pilot and Technician profiles contain profession-specific qualification data.
+
+### Application
+
+Contains commands, queries, handlers, validators, DTOs/results, and MediatR pipeline behaviors.
+
+### Infrastructure
+
+Contains EF Core, SQL Server persistence, entity configurations, Identity integration, and infrastructure service implementations.
+
+### API
+
+Contains Carter endpoint modules, HTTP routing, authorization, Swagger/OpenAPI metadata, and request/response handling.
+
+---
+
+# 🔐 Authentication & Authorization
+
+ASP.NET Identity is used for authentication infrastructure.
+
+`ApplicationUser` maps the authenticated Identity account to the domain user through `DomainUserId`.
+
+Authorization is role-based, with resource-level checks where required.
+
+Current roles:
+
+- Admin
+- MaintenanceSupervisor
+- Technician
+- InventoryClerk
+- Pilot
+- OperationsManager
+
+Examples of authorization responsibilities include:
+
+- Maintenance Request access
+- Maintenance history/task access
+- Work Order access and technician assignment checks
+- Inventory Management
+- Administrative role changes
+
+JWT role claims represent the user's current authorization role at token creation time.
+
+---
+
+# 📦 Inventory
+
+Inventory Management includes:
+
+- Inventory Part creation
+- Receive Inventory
+- Issue Inventory
+- Adjust Inventory
+- Inventory lookup
+- Inventory transaction history
+- Low-stock / restock queries
+
+Stock-changing operations create audit transactions containing the relevant inventory part, Work Order when applicable, performing domain user, transaction type, quantity information, and reason/context.
+
+Reserve Inventory is intentionally deferred until a concrete business requirement exists for allocating and reserving stock.
+
+---
+
+# ✅ Validation & Business Rules
+
+Validation is split between application-level input validation and domain behavior.
+
+### FluentValidation
+
+Used for input concerns such as:
+
+- Required fields
+- String lengths
+- Numeric ranges
+- Dates
+- Email formatting
+
+### Domain Layer
+
+Responsible for business rules and state transitions such as:
+
+- Employment lifecycle changes
+- Role changes
+- Aircraft/work-order behavior
+- Inventory quantity changes
+- Maintenance lifecycle behavior
+
+This keeps business behavior out of API endpoints where possible.
+
+---
+
+# 🧪 Testing
+
+Sprint 9 included integration and regression verification covering:
+
+- Employee/User creation and update
+- Role changes and promotions
+- Specialized profile persistence
+- Authorization after role changes
+- Authenticated Inventory operations
+- Inventory audit behavior
+- Inventory / Work Order interaction
+- Sprint 8 regression coverage
+
+Builds and tests remained green through the Sprint 9 hardening and technical-debt cleanup work.
 
 ---
 
 # 🧩 Design Patterns
 
-This project demonstrates several enterprise development patterns:
-
-- Clean Architecture
-- CQRS (Command Query Responsibility Segregation)
-- Domain-Driven Design (DDD)
-- Repository Pattern
-- Dependency Injection
-- Factory Methods
-- Domain Result Pattern
-- Validation Pipeline Behaviour
-
----
-
-# ✅ Validation Strategy
-
-Validation is intentionally split into two layers.
-
-### FluentValidation
-
-Used for:
-
-- Required fields
-- Length validation
-- Date validation
-- Input formatting
-
-### Domain Layer
-
-Responsible for business rules such as:
-
-- Aircraft assignment rules
-- Flight hour validation
-- Operational status changes
-- Aggregate behaviour
-
-This separation keeps business logic inside the domain where it belongs.
-
----
-
-# 📖 Learning Objectives
-
-This project has strengthened my understanding of:
+The project demonstrates:
 
 - Clean Architecture
 - CQRS
 - Domain-Driven Design
-- MediatR
+- Dependency Injection
+- Factory Methods
+- Domain Result Pattern
+- Validation Pipeline Behavior
 - Entity Framework Core
-- RESTful API Design
-- Minimal APIs
-- FluentValidation
-- Separation of Concerns
+- TPH inheritance for specialized User profiles
 
 ---
 
-# 🚀 Upcoming Work
+# 🚀 Roadmap
 
-Planned features include:
+Completed milestones include the core Aircraft, Pilot, Technician, Maintenance Request, Work Order, Inventory, authentication, authorization, and Sprint 9 domain-foundation work.
 
-- Maintenance Requests
-- Maintenance Scheduling
-- Maintenance History
-- JWT Authentication
-- Role-Based Authorization
-- Unit Testing
-- Integration Testing
-- Docker Improvements
-- Azure Deployment
-- CI/CD Pipeline
-- Kafka Messaging
+Planned future areas include:
+
+- Kafka messaging
+- Notifications
+- Reporting and analytics
+- Security and API hardening
+- React frontend
+- Docker deployment improvements
+- Azure deployment
+- CI/CD
+
+See `docs/Roadmap.md` for the current roadmap.
 
 ---
 
@@ -125,4 +234,4 @@ Planned features include:
 
 Backend Software Developer
 
-This repository documents my journey developing enterprise-style backend applications while applying Clean Architecture, CQRS, and Domain-Driven Design principles through sprint-based development. Ideas and retrospectives are found in the .md files.
+This repository documents an ongoing journey building enterprise-style backend applications while applying Clean Architecture, CQRS, Domain-Driven Design, API security, testing, and incremental sprint-based development.
