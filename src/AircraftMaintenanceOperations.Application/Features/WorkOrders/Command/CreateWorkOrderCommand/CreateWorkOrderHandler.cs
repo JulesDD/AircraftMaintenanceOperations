@@ -1,6 +1,4 @@
-﻿using AircraftMaintenanceOperations.Domain.Interfaces;
-
-namespace AircraftMaintenanceOperations.Application.Features.WorkOrders.Command.CreateWorkOrderCommand;
+﻿namespace AircraftMaintenanceOperations.Application.Features.WorkOrders.Command.CreateWorkOrderCommand;
 
 public class CreateWorkOrderHandler(IAircraftMaintenanceDbContext dbContext, INumberGenerator numberGenerator) : ICommandHandler<CreateWorkOrderCommand, CreatedWorkOrderResult>
 {

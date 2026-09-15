@@ -1,6 +1,6 @@
 ﻿namespace AircraftMaintenanceOperations.Application.Abstractions.Services;
 
-internal interface INumberGenerator
+public interface INumberGenerator
 {
     Task<string> GenerateWorkOrderNumberAsync();
     Task<string> GenerateMaintenanceRequestNumberAsync();
