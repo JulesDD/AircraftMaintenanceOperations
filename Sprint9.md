@@ -1,4 +1,4 @@
-Sprint 9 --- Domain Foundation & Inventory Hardening
+Sprint 9 --- Domain Foundation & Inventory Hardening — COMPLETE
 
 Objective
 
@@ -31,11 +31,11 @@ Preserve historical employee information when roles change.
 Current roles: - Admin - MaintenanceSupervisor - Technician -
 InventoryClerk - Pilot - OperationsManager
 
-Tasks: - [ ] Separate current authorization role from specialized
-profile/qualification data. - [ ] Define how current roles are
-represented. - [ ] Define role changes and promotions. - [ ]
-Preserve historical profile information after role changes. - [ ]
-Define rules for promotion/demotion/role transitions.
+Tasks:	- Separate current authorization role from specialized profile/qualification data. 
+		- Define how current roles are represented. 
+		- Define role changes and promotions. 
+		- Preserve historical profile information after role changes. 
+		- Define rules for promotion/demotion/role transitions.
 
 9.3 Specialized Profiles
 
@@ -183,7 +183,7 @@ Correct remaining API descriptions/naming inconsistencies.
 
 Avoid broad refactors that do not support the sprint objective.
 
-9.9 Documentation
+9.9 Documentation — COMPLETE
 
 Document Employee/User/Role/Profile architecture.
 
@@ -224,3 +224,11 @@ Documentation reflects the resulting domain model.
 
 Reservation has not been introduced without a real business
 requirement.
+
+## Sprint 9 Closeout
+
+**Status: COMPLETE**
+
+All planned Sprint 9 implementation, hardening, testing, targeted technical-debt cleanup, and documentation work has been completed.
+
+Reserve Inventory remains intentionally deferred pending a concrete business requirement.
