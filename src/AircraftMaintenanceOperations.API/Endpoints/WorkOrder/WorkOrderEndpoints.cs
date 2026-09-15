@@ -24,7 +24,7 @@ public class WorkOrderEndpoints : ICarterModule
             var result = await sender.Send(query);
             return Results.Ok(result);
         })
-            .WithName("GetAllWorkOrders")
+            .WithName("GetWorkOrders")
             .RequireAuthorization("Supervisor")
             .Produces<List<WorkOrderDto>>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status400BadRequest)
@@ -54,7 +54,7 @@ public class WorkOrderEndpoints : ICarterModule
             .Produces<UpdateWorkOrderResult>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .WithSummary("Updates an existing work order.")
-            .WithDescription("Update Work Order");
+            .WithDescription("Updates the details and estimated completion date of an existing work order.");
 
         group.MapPatch("/{id:guid}/archive", async (Guid id, ISender sender) =>
         {

@@ -27,7 +27,7 @@ public class InventoryEndpoints : ICarterModule
             .Produces<ReceiveInventoryCommandResult>(StatusCodes.Status201Created)
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status404NotFound)
-            .WithSummary("Receieve Inventory.")
+            .WithSummary("Receives inventory.")
             .WithDescription("Receive stock for an inventory part and record the inventory transaction.");
 
         group.MapPost("/{inventoryPartId}/issue", async(Guid inventoryPartId, Guid workOrderId, IssueInventoryCommand command, ISender sender) =>
@@ -103,6 +103,6 @@ public class InventoryEndpoints : ICarterModule
             .Produces(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status404NotFound)
             .WithSummary("Get Low Stock Items")
-            .WithDescription("Retrieve all inventory parts that are at or below their minimum quantity..");
+            .WithDescription("Retrieves all inventory parts that are at or below their minimum quantity.");
     }
 }

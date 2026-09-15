@@ -24,7 +24,7 @@ public class PilotEndpoints : ICarterModule
             var result = await sender.Send(query);
             return Results.Ok(new GetPilotResult(result.Pilots));
         })
-            .WithName("GetPilot")
+            .WithName("GetPilots")
             .Produces<GetPilotResult>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .WithSummary("Gets a list of Pilots.")
