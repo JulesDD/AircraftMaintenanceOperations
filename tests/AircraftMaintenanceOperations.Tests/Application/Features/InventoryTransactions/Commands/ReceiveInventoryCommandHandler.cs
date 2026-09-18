@@ -1,6 +1,4 @@
-﻿using static Microsoft.ApplicationInsights.MetricDimensionNames.TelemetryContext;
-
-namespace AircraftMaintenanceOperations.Tests.Application.Features.InventoryTransactions.Commands;
+﻿namespace AircraftMaintenanceOperations.Tests.Application.Features.InventoryTransactions.Commands;
 
 [TestClass]
 public class ReceiveInventoryCommandHandlerTests

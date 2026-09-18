@@ -1,4 +1,8 @@
 <Solution>
+  <Folder Name="/infrastructure/" />
+  <Folder Name="/infrastructure/kafka/">
+    <File Path="docker-compose.yml" />
+  </Folder>
   <Folder Name="/src/">
     <Project Path="src/AircraftMaintenanceOperations.API/AircraftMaintenanceOperations.API.csproj" />
     <Project Path="src/AircraftMaintenanceOperations.Application/AircraftMaintenanceOperations.Application.csproj" />
@@ -19,4 +23,5 @@
   <Folder Name="/tests/">
     <Project Path="tests/AircraftMaintenanceOperations.Tests/AircraftMaintenanceOperations.Tests.csproj" />
   </Folder>
+  <Project Path="KafkaConsumerTest/KafkaConsumerTest.csproj" />
 </Solution>
