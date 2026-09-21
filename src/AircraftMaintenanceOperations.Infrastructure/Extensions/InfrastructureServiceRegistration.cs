@@ -42,6 +42,7 @@ public static class InfrastructureServiceRegistration
 
         services.AddScoped<ICurrentUserService, CurrentUserService>();
 
+        services.AddSingleton<IEventPublisher, KafkaEventPublisher>();
 
         return services;
     }

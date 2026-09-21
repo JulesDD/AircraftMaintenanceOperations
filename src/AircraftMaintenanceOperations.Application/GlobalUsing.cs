@@ -7,6 +7,7 @@ global using AircraftMaintenanceOperations.Application.Features.MaintenanceReque
 global using AircraftMaintenanceOperations.Application.Interfaces;
 global using AircraftMaintenanceOperations.Domain.Entities;
 global using AircraftMaintenanceOperations.Domain.Enums;
+global using AircraftMaintenanceOperations.Domain.Events;
 global using FluentValidation;
 global using MediatR;
 global using Microsoft.EntityFrameworkCore;

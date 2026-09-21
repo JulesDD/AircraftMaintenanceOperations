@@ -1,8 +1,40 @@
-﻿namespace AircraftMaintenanceOperations.Tests.Application.Features.WorkOrders.Commands;
+﻿using AircraftMaintenanceOperations.Domain.Events;
+
+namespace AircraftMaintenanceOperations.Tests.Application.Features.WorkOrders.Commands;
 
 [TestClass]
 public class CompletedWorkOrderCommandHanderTests
 {
+    public class TestEventPublisher : IEventPublisher
+    {
+        public List<object> PublishedEvents { get; } = new();
+
+        public Task PublishAsync<T>(T @event, CancellationToken cancellationToken)
+        {
+            PublishedEvents.Add(@event!);
+            return Task.CompletedTask;
+        }
+    }
+
+    public class TestCurrentUserService : ICurrentUserService
+    {
+        private readonly Guid _domainUserId;
+
+        public TestCurrentUserService(Guid domainUserId)
+        {
+            _domainUserId = domainUserId;
+        }
+
+        public Guid UserId => _domainUserId;
+
+        public IReadOnlyCollection<string> Roles =>
+            Array.Empty<string>();
+
+        public Task<Guid> GetDomainUserIdAsync(CancellationToken cancellationToken) 
+        {
+            return Task.FromResult(_domainUserId);
+        }
+    }
     private AircraftMaintenanceDbContext CreateDbContext()
     {
         var options = new DbContextOptionsBuilder<AircraftMaintenanceDbContext>()
@@ -49,7 +81,10 @@ public class CompletedWorkOrderCommandHanderTests
         dbContext.WorkOrders.Add(workOrder);
 
         await dbContext.SaveChangesAsync();
-        var handler = new CompletedWorkOrderCommandHandler(dbContext);
+        var userId = Guid.NewGuid();
+        var currentUserService = new TestCurrentUserService(userId);
+        var eventPublisher = new TestEventPublisher();
+        var handler = new CompletedWorkOrderCommandHandler(dbContext, currentUserService, eventPublisher);
         var command = new CompletedWorkOrderCommand(
             workOrder.Id,
             "Work order completed successfully",
@@ -60,6 +95,15 @@ public class CompletedWorkOrderCommandHanderTests
 
         // Assert
         Assert.IsTrue(result.IsSuccess);
+        Assert.AreEqual(1, eventPublisher.PublishedEvents.Count);
+
+        var publishedEvent = eventPublisher.PublishedEvents.Single() as WorkOrderCompletedEvent;
+        Assert.IsNotNull(publishedEvent);
+        Assert.AreEqual(workOrder.Id, publishedEvent.WorkOrderId);
+        Assert.AreEqual(workOrder.AircraftId, publishedEvent.AircraftId);
+        Assert.AreEqual(userId, publishedEvent.CompletedByUserId);
+        Assert.AreNotEqual(Guid.Empty, publishedEvent.EventId);
+        Assert.IsTrue(publishedEvent.OccurredAt <= DateTimeOffset.UtcNow);
 
         var savedWorkOrder = await dbContext.WorkOrders.FirstAsync(w => w.Id == workOrder.Id);
 
@@ -74,8 +118,10 @@ public class CompletedWorkOrderCommandHanderTests
     {
         // Arrange
         await using var dbContext = CreateDbContext();
-
-        var handler = new CompletedWorkOrderCommandHandler(dbContext);
+        var userId = Guid.NewGuid();
+        var currentUserService = new TestCurrentUserService(userId);
+        var eventPublisher = new TestEventPublisher();
+        var handler = new CompletedWorkOrderCommandHandler(dbContext, currentUserService, eventPublisher);
 
         var command = new CompletedWorkOrderCommand(
             Guid.NewGuid(),
@@ -87,6 +133,7 @@ public class CompletedWorkOrderCommandHanderTests
 
         // Assert
         Assert.IsFalse(result.IsSuccess);
+        Assert.AreEqual(0, eventPublisher.PublishedEvents.Count);
         Assert.AreEqual("Unable to find work order", result.ErrorMessage);
     }
 
@@ -115,27 +162,23 @@ public class CompletedWorkOrderCommandHanderTests
             DateTime.UtcNow.AddDays(7),
             "Initial maintenance note");
 
-        var assignResult = workOrder.AssignTechnician(
-            technician,
-            "Technician assigned");
-
+        var assignResult = workOrder.AssignTechnician(technician, "Technician assigned");
         Assert.IsTrue(assignResult.IsSuccess);
 
-        var inProgressResult = workOrder.InProgress(
-            "Maintenance work started");
-
+        var inProgressResult = workOrder.InProgress("Maintenance work started");
         Assert.IsTrue(inProgressResult.IsSuccess);
 
-        var inspectionResult = workOrder.Inspection(
-            "Inspection completed");
-
+        var inspectionResult = workOrder.Inspection("Inspection completed");
         Assert.IsTrue(inspectionResult.IsSuccess);
 
         dbContext.WorkOrders.Add(workOrder);
 
         await dbContext.SaveChangesAsync();
 
-        var handler = new CompletedWorkOrderCommandHandler(dbContext);
+        var userId = Guid.NewGuid();
+        var currentUserService = new TestCurrentUserService(userId);
+        var eventPublisher = new TestEventPublisher();
+        var handler = new CompletedWorkOrderCommandHandler(dbContext, currentUserService, eventPublisher);
 
         var command = new CompletedWorkOrderCommand(
             workOrder.Id,
@@ -143,16 +186,12 @@ public class CompletedWorkOrderCommandHanderTests
             4.5m);
 
         // Act
-        var result = await handler.Handle(
-            command,
-            CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None);
 
         // Assert
         Assert.IsFalse(result.IsSuccess);
-
-        Assert.AreEqual(
-            "A status note is required.",
-            result.ErrorMessage);
+        Assert.AreEqual(0, eventPublisher.PublishedEvents.Count);
+        Assert.AreEqual("A status note is required.", result.ErrorMessage);
     }
 
     [TestMethod]
@@ -186,21 +225,20 @@ public class CompletedWorkOrderCommandHanderTests
 
         Assert.IsTrue(assignResult.IsSuccess);
 
-        var inProgressResult = workOrder.InProgress(
-            "Maintenance work started");
-
+        var inProgressResult = workOrder.InProgress("Maintenance work started");
         Assert.IsTrue(inProgressResult.IsSuccess);
 
-        var inspectionResult = workOrder.Inspection(
-            "Inspection completed");
-
+        var inspectionResult = workOrder.Inspection("Inspection completed");
         Assert.IsTrue(inspectionResult.IsSuccess);
 
         dbContext.WorkOrders.Add(workOrder);
 
         await dbContext.SaveChangesAsync();
 
-        var handler = new CompletedWorkOrderCommandHandler(dbContext);
+        var userId = Guid.NewGuid();
+        var currentUserService = new TestCurrentUserService(userId);
+        var eventPublisher = new TestEventPublisher();
+        var handler = new CompletedWorkOrderCommandHandler(dbContext, currentUserService, eventPublisher);
 
         var command = new CompletedWorkOrderCommand(
             workOrder.Id,
@@ -208,16 +246,12 @@ public class CompletedWorkOrderCommandHanderTests
             0m);
 
         // Act
-        var result = await handler.Handle(
-            command,
-            CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None);
 
         // Assert
         Assert.IsFalse(result.IsSuccess);
-
-        Assert.AreEqual(
-            "Labor hours must be greater than zero.",
-            result.ErrorMessage);
+        Assert.AreEqual(0, eventPublisher.PublishedEvents.Count);
+        Assert.AreEqual("Labor hours must be greater than zero.", result.ErrorMessage);
     }
 
     [TestMethod]
@@ -251,9 +285,7 @@ public class CompletedWorkOrderCommandHanderTests
 
         Assert.IsTrue(assignResult.IsSuccess);
 
-        var inProgressResult = workOrder.InProgress(
-            "Maintenance work started");
-
+        var inProgressResult = workOrder.InProgress("Maintenance work started");
         Assert.IsTrue(inProgressResult.IsSuccess);
 
         // Deliberately do NOT move the work order to Inspection.
@@ -261,8 +293,10 @@ public class CompletedWorkOrderCommandHanderTests
         dbContext.WorkOrders.Add(workOrder);
 
         await dbContext.SaveChangesAsync();
-
-        var handler = new CompletedWorkOrderCommandHandler(dbContext);
+        var userId = Guid.NewGuid();
+        var currentUserService = new TestCurrentUserService(userId);
+        var eventPublisher = new TestEventPublisher();
+        var handler = new CompletedWorkOrderCommandHandler(dbContext, currentUserService, eventPublisher);
 
         var command = new CompletedWorkOrderCommand(
             workOrder.Id,
@@ -270,16 +304,12 @@ public class CompletedWorkOrderCommandHanderTests
             4.5m);
 
         // Act
-        var result = await handler.Handle(
-            command,
-            CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None);
 
         // Assert
         Assert.IsFalse(result.IsSuccess);
-
-        Assert.AreEqual(
-            "Only work orders in inspection can be completed.",
-            result.ErrorMessage);
+        Assert.AreEqual(0, eventPublisher.PublishedEvents.Count);
+        Assert.AreEqual("Only work orders in inspection can be completed.", result.ErrorMessage);
     }
 
     [TestMethod]
@@ -307,57 +337,37 @@ public class CompletedWorkOrderCommandHanderTests
             DateTime.UtcNow.AddDays(7),
             "Initial maintenance note");
 
-        var assignResult = workOrder.AssignTechnician(
-            technician,
-            "Technician assigned");
-
+        var assignResult = workOrder.AssignTechnician(technician, "Technician assigned");
         Assert.IsTrue(assignResult.IsSuccess);
 
-        var inProgressResult = workOrder.InProgress(
-            "Maintenance work started");
-
+        var inProgressResult = workOrder.InProgress("Maintenance work started");
         Assert.IsTrue(inProgressResult.IsSuccess);
 
-        var inspectionResult = workOrder.Inspection(
-            "Inspection completed");
-
+        var inspectionResult = workOrder.Inspection("Inspection completed");
         Assert.IsTrue(inspectionResult.IsSuccess);
 
         dbContext.WorkOrders.Add(workOrder);
 
         await dbContext.SaveChangesAsync();
 
-        var handler = new CompletedWorkOrderCommandHandler(dbContext);
+        var userId = Guid.NewGuid();
+        var currentUserService = new TestCurrentUserService(userId);
+        var eventPublisher = new TestEventPublisher();
+        var handler = new CompletedWorkOrderCommandHandler(dbContext, currentUserService, eventPublisher);
 
-        var command = new CompletedWorkOrderCommand(
-            workOrder.Id,
-            "Final maintenance completed",
-            6.5m);
+        var command = new CompletedWorkOrderCommand(workOrder.Id, "Final maintenance completed", 6.5m);
 
         // Act
-        var result = await handler.Handle(
-            command,
-            CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None);
 
         // Assert
         Assert.IsTrue(result.IsSuccess);
 
-        var savedWorkOrder = await dbContext.WorkOrders
-            .FirstAsync(w => w.Id == workOrder.Id);
+        var savedWorkOrder = await dbContext.WorkOrders.FirstAsync(w => w.Id == workOrder.Id);
 
-        Assert.AreEqual(
-            WorkOrderStatus.Completed,
-            savedWorkOrder.WorkOrderStatus);
-
-        Assert.AreEqual(
-            6.5m,
-            savedWorkOrder.LaborHours);
-
-        Assert.AreEqual(
-            "Final maintenance completed",
-            savedWorkOrder.LaborNotes);
-
-        Assert.IsNotNull(
-            savedWorkOrder.ActualCompletionDate);
+        Assert.AreEqual(WorkOrderStatus.Completed, savedWorkOrder.WorkOrderStatus);
+        Assert.AreEqual(6.5m, savedWorkOrder.LaborHours);
+        Assert.AreEqual("Final maintenance completed", savedWorkOrder.LaborNotes);
+        Assert.IsNotNull(savedWorkOrder.ActualCompletionDate);
     }
 }

@@ -37,8 +37,10 @@ global using AircraftMaintenanceOperations.Application.Features.User.Commands.Ch
 global using AircraftMaintenanceOperations.Application.Features.User.Commands.CreateUser;
 global using AircraftMaintenanceOperations.Application.Features.WorkOrders.Command.ArchiveWorkOrderCommand;
 global using AircraftMaintenanceOperations.Application.Features.WorkOrders.Command.AssignTechnicianCommand;
+global using AircraftMaintenanceOperations.Application.Features.WorkOrders.Command.CompletedWorkOrder;
 global using AircraftMaintenanceOperations.Application.Features.WorkOrders.Command.CreateWorkOrderCommand;
 global using AircraftMaintenanceOperations.Application.Features.WorkOrders.Command.InProgressCommand;
+global using AircraftMaintenanceOperations.Application.Features.WorkOrders.Command.InspectionCommand;
 global using AircraftMaintenanceOperations.Application.Features.WorkOrders.Command.UpdateWorkOrderCommand;
 global using AircraftMaintenanceOperations.Application.Features.WorkOrders.Queries.GetWorkOrderByIdQuery;
 global using AircraftMaintenanceOperations.Application.Features.WorkOrders.Queries.GetWorkOrderQuery;
