@@ -1,4 +1,6 @@
-﻿namespace AircraftMaintenanceOperations.Infrastructure.Persistence.Context;
+﻿using AircraftMaintenanceOperations.Domain.Common;
+
+namespace AircraftMaintenanceOperations.Infrastructure.Persistence.Context;
 
 public class AircraftMaintenanceDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>, IAircraftMaintenanceDbContext
 {
@@ -22,5 +24,21 @@ public class AircraftMaintenanceDbContext : IdentityDbContext<ApplicationUser, I
     {
         base.OnModelCreating(modelBuilder);
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AircraftMaintenanceDbContext).Assembly);
+    }
+
+    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        Console.WriteLine(">>> CUSTOM SaveChangesAsync CALLED <<<");
+
+        var now = DateTime.UtcNow;
+
+        foreach (var entry in ChangeTracker.Entries<BaseEntity>())
+        {
+
+            if (entry.State == EntityState.Added) entry.Entity.SetCreatedDate(now);
+            if (entry.State == EntityState.Modified) entry.Entity.SetModifiedDate(now);
+        }
+
+        return await base.SaveChangesAsync(cancellationToken);
     }
 }

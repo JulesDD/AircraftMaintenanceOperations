@@ -1,7 +1,4 @@
-﻿using AircraftMaintenanceOperations.Application.Features.MaintenanceRequests.Commands.StartMaintenanceRequest;
-using AircraftMaintenanceOperations.Application.Features.MaintenanceTask.Queries.GetMaintenanceTaskQuery;
-
-namespace AircraftMaintenanceOperations.API.Endpoints.Maintenance;
+﻿namespace AircraftMaintenanceOperations.API.Endpoints.Maintenance;
 
 public record GetMaintenanceParameters(
     string? RequestNumber,

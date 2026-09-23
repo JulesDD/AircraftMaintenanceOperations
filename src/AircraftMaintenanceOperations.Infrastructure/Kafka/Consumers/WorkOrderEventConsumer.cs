@@ -15,7 +15,7 @@ public class WorkOrderEventConsumer
 
     public void Start()
     {
-        using var consumer = new ConsumerBuilder<Ignore, string>(_config)
+        using var consumer = new ConsumerBuilder<string, string>(_config)
             .Build();
 
         consumer.Subscribe("work-order-events");

@@ -14,8 +14,8 @@ public class MaintenanceRequestConfiguration : IEntityTypeConfiguration<Maintena
         builder.HasIndex(mr => mr.AircraftId);
 
         builder.Property(mr => mr.RequestedBy)
-            .IsRequired()
-            .HasMaxLength(50);
+            .IsRequired();
+
         builder.HasIndex(mr => mr.RequestedBy);
 
         builder.Property(mr => mr.Description).IsRequired().HasMaxLength(1000);
