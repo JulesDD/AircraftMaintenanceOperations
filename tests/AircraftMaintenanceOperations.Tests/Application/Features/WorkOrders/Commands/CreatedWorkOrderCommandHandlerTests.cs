@@ -383,9 +383,4 @@ public class CreatedWorkOrderCommandHandlerTests
         Assert.AreEqual("Work orders can only be created from InProgress requests.", exceptionMessage);
         Assert.AreEqual(0, eventPublisher.PublishedEvents.Count);
     }
-
-    [TestMethod]
-    public async Task Handle_ShouldNotPublishEvent_WhenWorkOrderCreationFails()
-    {
-    }
 }
