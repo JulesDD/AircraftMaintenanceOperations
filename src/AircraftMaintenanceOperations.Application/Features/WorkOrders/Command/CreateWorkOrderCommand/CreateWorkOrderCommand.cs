@@ -3,7 +3,6 @@
 public record CreateWorkOrderCommand(
     Guid MaintenanceRequestId,
     Guid AircraftId,
-    Guid AssignedTechnicianId,
     MaintenancePriority WorkOrderPriority,
     DateTime EstimatedCompletionDate,
     string LaborNotes
