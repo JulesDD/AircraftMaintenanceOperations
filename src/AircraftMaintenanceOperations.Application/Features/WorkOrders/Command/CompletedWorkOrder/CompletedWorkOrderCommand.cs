@@ -5,6 +5,6 @@ public record CompletedWorkOrderCommand
     Guid WorkOrderId,
     string LaborNotes,
     decimal LaborHours
-) : IRequest<CompletedWorkOrderResult>;
+) : ICommand<CompletedWorkOrderResult>;
 
 public record CompletedWorkOrderResult(bool IsSuccess, string? ErrorMessage = null);

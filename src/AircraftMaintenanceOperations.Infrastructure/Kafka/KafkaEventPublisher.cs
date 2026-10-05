@@ -33,18 +33,13 @@ public class KafkaEventPublisher : IEventPublisher
         {
             WorkOrderCompletedEvent => "work-order-events",
             WorkOrderCreatedEvent => "work-order-events",
+            TechnicianAssignedToWorkOrderEvent => "work-order-events",
             _ => throw new InvalidOperationException($"No Kafka topic configured for event type {typeof(T).Name}.")
         };
     }
 
     private static string GetEventKey<T>(T @event)
     {
-        Console.WriteLine($"Generic type: {typeof(T).AssemblyQualifiedName}");
-        Console.WriteLine($"Runtime type: {@event?.GetType().AssemblyQualifiedName}");
-
-        Console.WriteLine(
-            $"Expected type: {typeof(WorkOrderCreatedEvent).AssemblyQualifiedName}");
-
         return @event switch
         {
             WorkOrderCompletedEvent workOrderEvent =>
@@ -52,6 +47,9 @@ public class KafkaEventPublisher : IEventPublisher
 
             WorkOrderCreatedEvent workOrderEvent =>
                 workOrderEvent.WorkOrderId.ToString(),
+            
+            TechnicianAssignedToWorkOrderEvent workOrderEvnt =>
+                workOrderEvnt.WorkOrderId.ToString(),
 
             _ => throw new InvalidOperationException(
                 $"No Kafka key configured for event type {typeof(T).Name}.")

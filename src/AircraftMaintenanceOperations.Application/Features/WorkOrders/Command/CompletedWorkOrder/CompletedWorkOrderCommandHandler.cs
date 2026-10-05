@@ -1,6 +1,6 @@
 ﻿namespace AircraftMaintenanceOperations.Application.Features.WorkOrders.Command.CompletedWorkOrder;
 
-public class CompletedWorkOrderCommandHandler(IAircraftMaintenanceDbContext DbContext, ICurrentUserService CurrentUser, IEventPublisher EventPublisher) : IRequestHandler<CompletedWorkOrderCommand, CompletedWorkOrderResult>
+public class CompletedWorkOrderCommandHandler(IAircraftMaintenanceDbContext DbContext, ICurrentUserService CurrentUser, IEventPublisher EventPublisher) : ICommandHandler<CompletedWorkOrderCommand, CompletedWorkOrderResult>
 {
     public async Task<CompletedWorkOrderResult> Handle(CompletedWorkOrderCommand request, CancellationToken cancellationToken)
     {
