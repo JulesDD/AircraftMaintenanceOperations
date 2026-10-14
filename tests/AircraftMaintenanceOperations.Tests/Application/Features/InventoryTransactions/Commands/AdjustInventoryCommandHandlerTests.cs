@@ -1,6 +1,4 @@
-﻿using AircraftMaintenanceOperations.Application.Features.InventoryTransaction.Commands.AdjustInventory;
-
-namespace AircraftMaintenanceOperations.Tests.Application.Features.InventoryTransactions.Commands;
+﻿namespace AircraftMaintenanceOperations.Tests.Application.Features.InventoryTransactions.Commands;
 
 [TestClass]
 public class AdjustInventoryCommandHandlerTests

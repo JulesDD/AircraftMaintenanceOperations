@@ -1,9 +1,14 @@
 ﻿global using AircraftMaintenanceOperations.Application.Abstractions.Services;
 global using AircraftMaintenanceOperations.Application.Common.Interfaces;
+global using AircraftMaintenanceOperations.Application.Features.InventoryTransaction.Commands.AdjustInventory;
+global using AircraftMaintenanceOperations.Application.Features.InventoryTransaction.Commands.IssueInventory;
 global using AircraftMaintenanceOperations.Application.Features.InventoryTransaction.Commands.ReceiveInventory;
 global using AircraftMaintenanceOperations.Application.Features.User.Commands.ChangeUserRole;
+global using AircraftMaintenanceOperations.Application.Features.WorkOrders.Command.AssignTechnicianCommand;
 global using AircraftMaintenanceOperations.Application.Features.WorkOrders.Command.CompletedWorkOrder;
 global using AircraftMaintenanceOperations.Application.Features.WorkOrders.Command.CreateWorkOrderCommand;
+global using AircraftMaintenanceOperations.Application.Features.WorkOrders.Command.InProgressCommand;
+global using AircraftMaintenanceOperations.Application.Features.WorkOrders.Command.InspectionCommand;
 global using AircraftMaintenanceOperations.Domain.Entities;
 global using AircraftMaintenanceOperations.Domain.Enums;
 global using AircraftMaintenanceOperations.Domain.Events;

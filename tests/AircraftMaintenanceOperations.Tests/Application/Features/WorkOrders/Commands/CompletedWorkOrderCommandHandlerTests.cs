@@ -1,6 +1,4 @@
-﻿using AircraftMaintenanceOperations.Domain.Events;
-
-namespace AircraftMaintenanceOperations.Tests.Application.Features.WorkOrders.Commands;
+﻿namespace AircraftMaintenanceOperations.Tests.Application.Features.WorkOrders.Commands;
 
 [TestClass]
 public class CompletedWorkOrderCommandHanderTests
