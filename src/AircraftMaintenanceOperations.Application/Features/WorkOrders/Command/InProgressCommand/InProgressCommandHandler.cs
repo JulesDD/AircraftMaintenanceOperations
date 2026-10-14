@@ -1,6 +1,6 @@
 ﻿namespace AircraftMaintenanceOperations.Application.Features.WorkOrders.Command.InProgressCommand;
 
-public class InProgressCommandHandler(IAircraftMaintenanceDbContext DbContext, ICurrentUserService CurrentUser) : ICommandHandler<InProgressCommand, InProgressCommandResult>
+public class InProgressCommandHandler(IAircraftMaintenanceDbContext DbContext, ICurrentUserService CurrentUser, IEventPublisher EventPublisher) : ICommandHandler<InProgressCommand, InProgressCommandResult>
 {
     public async Task<InProgressCommandResult> Handle(InProgressCommand command, CancellationToken cancellationToken)
     {
@@ -16,6 +16,16 @@ public class InProgressCommandHandler(IAircraftMaintenanceDbContext DbContext, I
         if (!inProgress.IsSuccess) return new InProgressCommandResult(false);
 
         await DbContext.SaveChangesAsync(cancellationToken);
+
+        var inProgressEvent = new WorkOrderInProgressEvent
+        {
+            EventId = Guid.NewGuid(),
+            WorkOrderId = workOrder.Id,
+            StartedByUserId = domainUserId,
+            OccurredAt = DateTimeOffset.UtcNow
+        };
+
+        await EventPublisher.PublishAsync(inProgressEvent, cancellationToken);
         return new InProgressCommandResult(true);
     }
 }

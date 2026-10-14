@@ -3,7 +3,6 @@
 [TestClass]
 public class CreatedWorkOrderCommandHandlerTests
 {
-
     public class WorkOrderNumberGenerator : INumberGenerator
     {
         public Task<string> GenerateMaintenanceRequestNumberAsync()

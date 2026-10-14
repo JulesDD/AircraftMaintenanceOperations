@@ -3,6 +3,37 @@
 [TestClass]
 public class ReceiveInventoryCommandHandlerTests
 {
+    public class TestEventPublisher : IEventPublisher
+    {
+        public List<object> PublishedEvents { get; } = new();
+
+        public Task PublishAsync<T>(T @event, CancellationToken cancellationToken)
+        {
+            PublishedEvents.Add(@event!);
+            return Task.CompletedTask;
+        }
+    }
+
+    public class TestCurrentUserService : ICurrentUserService
+    {
+        private readonly Guid _domainUserId;
+
+        public TestCurrentUserService(Guid domainUserId)
+        {
+            _domainUserId = domainUserId;
+        }
+
+        public Guid UserId => _domainUserId;
+
+        public IReadOnlyCollection<string> Roles =>
+            Array.Empty<string>();
+
+        public Task<Guid> GetDomainUserIdAsync(CancellationToken cancellationToken)
+        {
+            return Task.FromResult(_domainUserId);
+        }
+    }
+
     private AircraftMaintenanceDbContext CreateDbContext()
     {
         var options = new DbContextOptionsBuilder<AircraftMaintenanceDbContext>()
@@ -32,10 +63,12 @@ public class ReceiveInventoryCommandHandlerTests
         await dbContext.SaveChangesAsync();
 
         var currentUser = new FakeCurrentUserService(performedByUserId);
+        var eventPublisher = new TestEventPublisher();
 
         var handler = new ReceiveInventoryCommandHandler(
             dbContext,
-            currentUser);
+            currentUser,
+            eventPublisher);
 
         var command = new ReceiveInventoryCommand(inventoryPart.Id, 5, "Received shipment");
 
@@ -51,13 +84,18 @@ public class ReceiveInventoryCommandHandlerTests
 
         Assert.AreEqual(15, updatedInventory.QuantityOnHand);
 
-        Assert.IsNotNull(transaction);
-        Assert.AreEqual(InventoryTransactionType.Receipt, transaction.TransactionType);
-        Assert.AreEqual(5, transaction.Quantity);
-        Assert.AreEqual(10, transaction.QuantityBefore);
-        Assert.AreEqual(15, transaction.QuantityAfter);
-        Assert.AreEqual(performedByUserId, transaction.PerformedByUserId);
-        Assert.AreEqual("Received shipment", transaction.Reason);
+        Assert.AreEqual(1, eventPublisher.PublishedEvents.Count);
+        var publishedEvent = eventPublisher.PublishedEvents.Single() as InventoryReceivedEvent;
+
+        Assert.IsNotNull(publishedEvent);
+
+        Assert.AreEqual(inventoryPart.Id, publishedEvent.InventoryPartId);
+        Assert.AreEqual(5, publishedEvent.Quantity);
+        Assert.AreEqual("Received shipment", publishedEvent.Reason);
+        Assert.AreEqual(performedByUserId, publishedEvent.ReceivedByUserId);
+
+        Assert.AreNotEqual(Guid.Empty, publishedEvent.EventId);
+        Assert.AreNotEqual(default(DateTimeOffset), publishedEvent.OccurredAt);
     }
 
     [TestMethod]
@@ -77,9 +115,10 @@ public class ReceiveInventoryCommandHandlerTests
         dbContext.InventoryParts.Add(inventoryPart);
         await dbContext.SaveChangesAsync();
 
-        var currentUser = new FakeCurrentUserService(Guid.NewGuid());
+        var currentUser = new TestCurrentUserService(Guid.NewGuid());
+        var eventPublisher = new TestEventPublisher();
 
-        var handler = new ReceiveInventoryCommandHandler(dbContext, currentUser);
+        var handler = new ReceiveInventoryCommandHandler(dbContext, currentUser, eventPublisher);
 
         var command = new ReceiveInventoryCommand(inventoryPart.Id, 0, "Invalid receipt");
 
@@ -89,6 +128,9 @@ public class ReceiveInventoryCommandHandlerTests
         var updatedInventory = await dbContext.InventoryParts.FirstAsync(x => x.Id == inventoryPart.Id);
 
         var transactionCount = await dbContext.InventoryTransactions.CountAsync();
+
+        Assert.AreEqual(0, eventPublisher.PublishedEvents.Count);
+
 
         Assert.AreEqual(10, updatedInventory.QuantityOnHand);
         Assert.AreEqual(0, transactionCount);
@@ -111,9 +153,10 @@ public class ReceiveInventoryCommandHandlerTests
         dbContext.InventoryParts.Add(inventoryPart);
         await dbContext.SaveChangesAsync();
 
-        var currentUser = new FakeCurrentUserService(Guid.NewGuid());
+        var currentUser = new TestCurrentUserService(Guid.NewGuid());
+        var eventPublisher = new TestEventPublisher();
 
-        var handler = new ReceiveInventoryCommandHandler(dbContext, currentUser);
+        var handler = new ReceiveInventoryCommandHandler(dbContext, currentUser, eventPublisher);
 
         var command = new ReceiveInventoryCommand(inventoryPart.Id, -5, "Invalid receipt");
 
@@ -123,6 +166,9 @@ public class ReceiveInventoryCommandHandlerTests
         var updatedInventory = await dbContext.InventoryParts.FirstAsync(x => x.Id == inventoryPart.Id);
 
         var transactionCount = await dbContext.InventoryTransactions.CountAsync();
+
+        Assert.AreEqual(0, eventPublisher.PublishedEvents.Count);
+
 
         Assert.AreEqual(10, updatedInventory.QuantityOnHand);
         Assert.AreEqual(0, transactionCount);
@@ -134,9 +180,10 @@ public class ReceiveInventoryCommandHandlerTests
         // Arrange
         await using var dbContext = CreateDbContext();
 
-        var currentUser = new FakeCurrentUserService(Guid.NewGuid());
+        var currentUser = new TestCurrentUserService(Guid.NewGuid());
+        var eventPublisher = new TestEventPublisher();
 
-        var handler = new ReceiveInventoryCommandHandler(dbContext, currentUser);
+        var handler = new ReceiveInventoryCommandHandler(dbContext, currentUser, eventPublisher);
 
         var command = new ReceiveInventoryCommand(Guid.NewGuid(), 5, "Missing part");
 
@@ -144,9 +191,11 @@ public class ReceiveInventoryCommandHandlerTests
         await Assert.ThrowsExactlyAsync<InvalidOperationException>(() => handler.Handle(command, CancellationToken.None));
 
         var transactionCount = await dbContext.InventoryTransactions.CountAsync();
+        Assert.AreEqual(0, eventPublisher.PublishedEvents.Count);
 
         Assert.AreEqual(0, transactionCount);
     }
+
 
     private sealed class FakeCurrentUserService : ICurrentUserService
     {

@@ -1,12 +1,12 @@
 ﻿namespace AircraftMaintenanceOperations.Application.Features.WorkOrders.Command.InspectionCommand;
 
-public class InspectionCommandHandler(IAircraftMaintenanceDbContext DbContext, ICurrentUserService CurrentUser) : ICommandHandler<InspectionCommand, InspectionCommandResult>
+public class InspectionCommandHandler(IAircraftMaintenanceDbContext DbContext, ICurrentUserService CurrentUser, IEventPublisher EventPublisher) : ICommandHandler<InspectionCommand, InspectionCommandResult>
 {
     public async Task<InspectionCommandResult> Handle(InspectionCommand command, CancellationToken cancellationToken)
     {
         var domainUserId = await CurrentUser.GetDomainUserIdAsync(cancellationToken);
 
-        var isSupervisor = CurrentUser.Roles.Contains("Supervisor") || CurrentUser.Roles.Contains("Admin");
+        var isSupervisor = CurrentUser.Roles.Contains("MaintenanceSupervisor") || CurrentUser.Roles.Contains("Admin");
         
         
         var workOrder = await DbContext.WorkOrders.FindAsync(command.WorkOrderId);
@@ -17,6 +17,16 @@ public class InspectionCommandHandler(IAircraftMaintenanceDbContext DbContext, I
         if(!inspection.IsSuccess) return new InspectionCommandResult(false);
 
         await DbContext.SaveChangesAsync(cancellationToken);
+
+        var inspectionEvent = new WorkOrderSentToInspectionEvent
+        {
+            EventId = Guid.NewGuid(),
+            WorkOrderId = workOrder.Id,
+            SentByUserId = domainUserId,
+            OccurredAt = DateTimeOffset.UtcNow
+        };
+
+        await EventPublisher.PublishAsync(inspectionEvent, cancellationToken);
         return new InspectionCommandResult(true);
     }
 }

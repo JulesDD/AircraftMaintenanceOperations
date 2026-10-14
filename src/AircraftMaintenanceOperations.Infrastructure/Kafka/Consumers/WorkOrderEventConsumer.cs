@@ -3,33 +3,64 @@
 public class WorkOrderEventConsumer
 {
     private readonly ConsumerConfig _config;
+
     public WorkOrderEventConsumer()
     {
         _config = new ConsumerConfig
         {
             BootstrapServers = "localhost:9092",
-            GroupId = "maintenance-group",
+            GroupId = "workOrder-group",
             AutoOffsetReset = AutoOffsetReset.Earliest
         };
     }
 
-    public void Start()
+    public void Start(CancellationToken cancellationToken)
     {
         using var consumer = new ConsumerBuilder<string, string>(_config)
+            .SetErrorHandler((_, error) =>
+            {
+                Console.Error.WriteLine(
+                    $"Kafka error: {error.Code} - {error.Reason} " +
+                    $"(Fatal: {error.IsFatal})");
+            })
             .Build();
 
         consumer.Subscribe("work-order-events");
 
-        Console.WriteLine("Consumer started. Waiting for messages...");
+        Console.WriteLine("Work-order consumer started. Waiting for messages...");
 
-        while (true)
+        try
         {
-            var result = consumer.Consume();
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                try
+                {
+                    var result = consumer.Consume(cancellationToken);
 
-            Console.WriteLine($"Topic: {result.Topic} | " + $"Partition: {result.Partition} | " + $"Offset: {result.Offset}");
-            Console.WriteLine($"Key: {result.Message.Key}");
-            Console.WriteLine($"Value: {result.Message.Value}");
-            Console.WriteLine("--------------------------------");
+                    Console.WriteLine($"Topic: {result.Topic} | " + $"Partition: {result.Partition} | " + $"Offset: {result.Offset}");
+                    Console.WriteLine($"Key: {result.Message.Key}");
+                    Console.WriteLine($"Value: {result.Message.Value}");
+                    Console.WriteLine("--------------------------------");
+                }
+                catch (OperationCanceledException)
+                {
+                    break;
+                }
+                catch (ConsumeException ex)
+                {
+                    Console.Error.WriteLine($"Failed to consume message: {ex.Error.Code} - {ex.Error.Reason}");
+
+                    if (ex.Error.IsFatal)
+                    {
+                        throw;
+                    }
+                }
+            }
+        }
+        finally
+        {
+            consumer.Close();
+            Console.WriteLine("Work-order consumer shut down cleanly.");
         }
     }
 }

@@ -1,5 +1,23 @@
 ﻿using AircraftMaintenanceOperations.Infrastructure.Kafka.Consumers;
 
-var consumer = new WorkOrderEventConsumer();
+using var cts = new CancellationTokenSource();
 
-consumer.Start();
+Console.CancelKeyPress += (_, e) =>
+{
+    e.Cancel = true;
+    cts.Cancel();
+};
+
+var workOrderConsumer = new WorkOrderEventConsumer();
+var inventoryConsumer = new InventoryEventConsumer();
+
+Console.WriteLine("Both consumers are starting.");
+Console.WriteLine("Press Ctrl+C to shut down gracefully.");
+
+var workOrderTask = Task.Run(() => workOrderConsumer.Start(cts.Token));
+
+var inventoryTask = Task.Run(() => inventoryConsumer.Start(cts.Token));
+
+await Task.WhenAll(workOrderTask, inventoryTask);
+
+Console.WriteLine("All consumers have stopped.");

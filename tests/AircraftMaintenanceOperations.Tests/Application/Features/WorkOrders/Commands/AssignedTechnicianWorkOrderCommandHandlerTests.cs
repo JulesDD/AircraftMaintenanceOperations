@@ -84,12 +84,8 @@ public class AssignedTechnicianWorkOrderCommandHandlerTests
             technician.Id,
             "Assigning technician for unit testing.");
 
-       
-
         // Act
-        var result = await handler.Handle(
-            command,
-            CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None);
 
         // Assert
         Assert.IsTrue(result.IsSuccess);

@@ -1,10 +1,11 @@
 ﻿namespace AircraftMaintenanceOperations.Application.Features.InventoryTransaction.Commands.IssueInventory;
 
-public class IssueInventoryCommandHandler(IAircraftMaintenanceDbContext DbContext, ICurrentUserService CurrentUser) 
-    : ICommandHandler<IssueInventoryCommand, IssueInventoryCommandResult>
+public class IssueInventoryCommandHandler(IAircraftMaintenanceDbContext DbContext, ICurrentUserService CurrentUser, IEventPublisher EventPublisher) : ICommandHandler<IssueInventoryCommand, IssueInventoryCommandResult>
 {
     public async Task<IssueInventoryCommandResult> Handle(IssueInventoryCommand command, CancellationToken cancellationToken)
     {
+        var domainUserId = await CurrentUser.GetDomainUserIdAsync(cancellationToken);
+
         var inventory = await DbContext.InventoryParts.FirstOrDefaultAsync(i => i.Id == command.InventoryPartId, cancellationToken);
         if (inventory is null) throw new InvalidOperationException("Inventory could not be found");
         
@@ -50,6 +51,18 @@ public class IssueInventoryCommandHandler(IAircraftMaintenanceDbContext DbContex
             throw new InvalidOperationException($"Failed to save inventory issue: {ex.InnerException?.Message ?? ex.Message}", ex);
         }
 
+        var inventoryTransactionCreatedEvent = new InventoryIssuedForWorkOrderEvent
+        {
+            EventId = Guid.NewGuid(),
+            WorkOrderId = workOrder.Id,
+            IssuedByUserId = domainUserId,
+            InventoryPartId = inventory.Id,
+            Quantity = command.Quantity,
+            Reason = command.Reason,
+            OccurredAt = DateTimeOffset.UtcNow
+        };
+
+        await EventPublisher.PublishAsync(inventoryTransactionCreatedEvent, cancellationToken);
         return new IssueInventoryCommandResult(inventoryTransaction.Id);
     }
 }

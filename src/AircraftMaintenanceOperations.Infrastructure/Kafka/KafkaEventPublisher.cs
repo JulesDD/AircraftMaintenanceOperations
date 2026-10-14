@@ -34,6 +34,11 @@ public class KafkaEventPublisher : IEventPublisher
             WorkOrderCompletedEvent => "work-order-events",
             WorkOrderCreatedEvent => "work-order-events",
             TechnicianAssignedToWorkOrderEvent => "work-order-events",
+            WorkOrderInProgressEvent => "work-order-events",
+            WorkOrderSentToInspectionEvent => "work-order-events",
+            InventoryIssuedForWorkOrderEvent => "inventory-events",
+            InventoryAdjustedEvent => "inventory-events",
+            InventoryReceivedEvent => "inventory-events",
             _ => throw new InvalidOperationException($"No Kafka topic configured for event type {typeof(T).Name}.")
         };
     }
@@ -51,6 +56,20 @@ public class KafkaEventPublisher : IEventPublisher
             TechnicianAssignedToWorkOrderEvent workOrderEvnt =>
                 workOrderEvnt.WorkOrderId.ToString(),
 
+            WorkOrderInProgressEvent workOrderInProgressEvent =>
+                workOrderInProgressEvent.WorkOrderId.ToString(),
+
+            WorkOrderSentToInspectionEvent workOrderSentToInspectionEvent =>
+                workOrderSentToInspectionEvent.WorkOrderId.ToString(),
+
+            InventoryIssuedForWorkOrderEvent inventoryIssuedEvent =>
+                inventoryIssuedEvent.WorkOrderId.ToString(),
+
+            InventoryAdjustedEvent inventoryAdjustedEvent =>
+                inventoryAdjustedEvent.InventoryPartId.ToString(),
+
+            InventoryReceivedEvent inventoryReceivedEvent =>
+                inventoryReceivedEvent.InventoryPartId.ToString(),
             _ => throw new InvalidOperationException(
                 $"No Kafka key configured for event type {typeof(T).Name}.")
         };

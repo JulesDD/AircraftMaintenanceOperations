@@ -1,9 +1,11 @@
 ﻿namespace AircraftMaintenanceOperations.Application.Features.InventoryTransaction.Commands.AdjustInventory;
 
-public class AdjustInventoryCommandHandler(IAircraftMaintenanceDbContext DbContext, ICurrentUserService CurrentUser) : ICommandHandler<AdjustInventoryCommand, AdjustInventoryCommandResult>
+public class AdjustInventoryCommandHandler(IAircraftMaintenanceDbContext DbContext, ICurrentUserService CurrentUser, IEventPublisher EventPublisher) : ICommandHandler<AdjustInventoryCommand, AdjustInventoryCommandResult>
 {
     public async Task<AdjustInventoryCommandResult> Handle(AdjustInventoryCommand command, CancellationToken cancellationToken)
     {
+        var domainUserId = await CurrentUser.GetDomainUserIdAsync(cancellationToken);
+
         var inventoryPart = await DbContext.InventoryParts.FindAsync(new object[] { command.InventoryPartId }, cancellationToken);
         if (inventoryPart is null) throw new InvalidOperationException($"Inventory part with ID {command.InventoryPartId} not found.");
         
@@ -26,6 +28,18 @@ public class AdjustInventoryCommandHandler(IAircraftMaintenanceDbContext DbConte
 
         DbContext.InventoryTransactions.Add(inventoryTransaction);
         await DbContext.SaveChangesAsync(cancellationToken);
+
+        var inventoryTransactionCreatedEvent = new InventoryAdjustedEvent
+        {
+            EventId = Guid.NewGuid(),
+            InventoryPartId = inventoryTransaction.InventoryPartId,
+            AdjustedByUserId = domainUserId,
+            Quantity = command.Quantity,
+            Reason = command.Notes,
+            OccurredAt = DateTimeOffset.UtcNow
+        };
+
+        await EventPublisher.PublishAsync(inventoryTransactionCreatedEvent, cancellationToken);
         return new AdjustInventoryCommandResult(inventoryTransaction.Id);
 
     }

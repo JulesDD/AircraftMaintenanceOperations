@@ -11,6 +11,37 @@ namespace AircraftMaintenanceOperations.Tests.Application.Features.InventoryTran
 [TestClass]
 public class IssueInventoryCommandHandlerTests
 {
+    public class TestEventPublisher : IEventPublisher
+    {
+        public List<object> PublishedEvents { get; } = new();
+
+        public Task PublishAsync<T>(T @event, CancellationToken cancellationToken)
+        {
+            PublishedEvents.Add(@event!);
+            return Task.CompletedTask;
+        }
+    }
+
+    public class TestCurrentUserService : ICurrentUserService
+    {
+        private readonly Guid _domainUserId;
+
+        public TestCurrentUserService(Guid domainUserId)
+        {
+            _domainUserId = domainUserId;
+        }
+
+        public Guid UserId => _domainUserId;
+
+        public IReadOnlyCollection<string> Roles =>
+            Array.Empty<string>();
+
+        public Task<Guid> GetDomainUserIdAsync(CancellationToken cancellationToken)
+        {
+            return Task.FromResult(_domainUserId);
+        }
+    }
+
     private AircraftMaintenanceDbContext CreateDbContext()
     {
         var options = new DbContextOptionsBuilder<AircraftMaintenanceDbContext>()
@@ -42,11 +73,13 @@ public class IssueInventoryCommandHandlerTests
         dbContext.WorkOrders.Add(workOrder);
         await dbContext.SaveChangesAsync();
 
-        var currentUser = new FakeCurrentUserService(performedByUserId);
+        var currentUser = new TestCurrentUserService(performedByUserId);
+        var testEventPublisher = new TestEventPublisher();
 
         var handler = new IssueInventoryCommandHandler(
             dbContext,
-            currentUser);
+            currentUser,
+            testEventPublisher);
 
         var command = new IssueInventoryCommand(
             inventoryPart.Id,
@@ -60,41 +93,36 @@ public class IssueInventoryCommandHandlerTests
             CancellationToken.None);
 
         // Assert
-        var updatedInventory = await dbContext.InventoryParts
-            .FirstAsync(x => x.Id == inventoryPart.Id);
-
-        var usage = await dbContext.InventoryUsages
-            .FirstOrDefaultAsync();
-
-        var transaction = await dbContext.InventoryTransactions
-            .FirstOrDefaultAsync(x => x.Id == result.Id);
+        var updatedInventory = await dbContext.InventoryParts.FirstAsync(x => x.Id == inventoryPart.Id);
+        var usage = await dbContext.InventoryUsages.FirstOrDefaultAsync();
+        var transaction = await dbContext.InventoryTransactions.FirstOrDefaultAsync(x => x.Id == result.Id);
 
         Assert.AreEqual(6, updatedInventory.QuantityOnHand);
+
+        Assert.AreEqual(1, testEventPublisher.PublishedEvents.Count);
+        var publishedEvent = testEventPublisher.PublishedEvents.Single() as InventoryIssuedForWorkOrderEvent;
+
+        Assert.IsNotNull(publishedEvent);
+        Assert.AreEqual(inventoryPart.Id, publishedEvent.InventoryPartId);
+        Assert.AreEqual(workOrder.Id, publishedEvent.WorkOrderId);
+        Assert.AreEqual(performedByUserId, publishedEvent.IssuedByUserId);
+        Assert.AreEqual(4, publishedEvent.Quantity);
+        Assert.AreEqual("Issued for maintenance", publishedEvent.Reason);
+        Assert.AreNotEqual(Guid.Empty, publishedEvent.EventId);
+        Assert.AreNotEqual(default(DateTimeOffset), publishedEvent.OccurredAt);
 
         Assert.IsNotNull(usage);
         Assert.AreEqual(inventoryPart.Id, usage.InventoryPartId);
         Assert.AreEqual(workOrder.Id, usage.WorkOrderId);
         Assert.AreEqual(4, usage.QuantityUsed);
-
         Assert.IsNotNull(transaction);
-        Assert.AreEqual(
-            InventoryTransactionType.Usage,
-            transaction.TransactionType);
-
+        Assert.AreEqual(InventoryTransactionType.Usage, transaction.TransactionType);
         Assert.AreEqual(4, transaction.Quantity);
         Assert.AreEqual(10, transaction.QuantityBefore);
         Assert.AreEqual(6, transaction.QuantityAfter);
-        Assert.AreEqual(
-            performedByUserId,
-            transaction.PerformedByUserId);
-
-        Assert.AreEqual(
-            workOrder.Id,
-            transaction.WorkOrderId);
-
-        Assert.AreEqual(
-            "Issued for maintenance",
-            transaction.Reason);
+        Assert.AreEqual(performedByUserId, transaction.PerformedByUserId);
+        Assert.AreEqual(workOrder.Id, transaction.WorkOrderId);
+        Assert.AreEqual("Issued for maintenance", transaction.Reason);
     }
 
     [TestMethod]
@@ -117,11 +145,13 @@ public class IssueInventoryCommandHandlerTests
         dbContext.WorkOrders.Add(workOrder);
         await dbContext.SaveChangesAsync();
 
-        var currentUser = new FakeCurrentUserService(Guid.NewGuid());
+        var currentUser = new TestCurrentUserService(Guid.NewGuid());
+        var testEventPublisher = new TestEventPublisher();
 
         var handler = new IssueInventoryCommandHandler(
             dbContext,
-            currentUser);
+            currentUser,
+            testEventPublisher);
 
         var command = new IssueInventoryCommand(
             inventoryPart.Id,
@@ -130,25 +160,13 @@ public class IssueInventoryCommandHandlerTests
             "Too much inventory");
 
         // Act & Assert
-        await Assert.ThrowsExactlyAsync<InvalidOperationException>(
-            () => handler.Handle(
-                command,
-                CancellationToken.None));
+        await Assert.ThrowsExactlyAsync<InvalidOperationException>(() => handler.Handle(command, CancellationToken.None));
 
-        var updatedInventory = await dbContext.InventoryParts
-            .FirstAsync(x => x.Id == inventoryPart.Id);
-
-        Assert.AreEqual(
-            5,
-            updatedInventory.QuantityOnHand);
-
-        Assert.AreEqual(
-            0,
-            await dbContext.InventoryUsages.CountAsync());
-
-        Assert.AreEqual(
-            0,
-            await dbContext.InventoryTransactions.CountAsync());
+        var updatedInventory = await dbContext.InventoryParts.FirstAsync(x => x.Id == inventoryPart.Id);
+        Assert.AreEqual(0, testEventPublisher.PublishedEvents.Count);
+        Assert.AreEqual(5, updatedInventory.QuantityOnHand);
+        Assert.AreEqual(0, await dbContext.InventoryUsages.CountAsync());
+        Assert.AreEqual(0, await dbContext.InventoryTransactions.CountAsync());
     }
 
     [TestMethod]
@@ -171,11 +189,13 @@ public class IssueInventoryCommandHandlerTests
         dbContext.WorkOrders.Add(workOrder);
         await dbContext.SaveChangesAsync();
 
-        var currentUser = new FakeCurrentUserService(Guid.NewGuid());
+        var currentUser = new TestCurrentUserService(Guid.NewGuid());
+        var testEventPublisher = new TestEventPublisher();
 
         var handler = new IssueInventoryCommandHandler(
             dbContext,
-            currentUser);
+            currentUser,
+            testEventPublisher);
 
         var command = new IssueInventoryCommand(
             inventoryPart.Id,
@@ -189,20 +209,12 @@ public class IssueInventoryCommandHandlerTests
                 command,
                 CancellationToken.None));
 
-        var updatedInventory = await dbContext.InventoryParts
-            .FirstAsync(x => x.Id == inventoryPart.Id);
-
-        Assert.AreEqual(
-            10,
-            updatedInventory.QuantityOnHand);
-
-        Assert.AreEqual(
-            0,
-            await dbContext.InventoryUsages.CountAsync());
-
-        Assert.AreEqual(
-            0,
-            await dbContext.InventoryTransactions.CountAsync());
+        var updatedInventory = await dbContext.InventoryParts.FirstAsync(x => x.Id == inventoryPart.Id);
+        
+        Assert.AreEqual(10, updatedInventory.QuantityOnHand);
+        Assert.AreEqual(0, await dbContext.InventoryUsages.CountAsync());
+        Assert.AreEqual(0, await dbContext.InventoryTransactions.CountAsync());
+        Assert.AreEqual(0, testEventPublisher.PublishedEvents.Count);
     }
 
     [TestMethod]
@@ -225,11 +237,13 @@ public class IssueInventoryCommandHandlerTests
         dbContext.WorkOrders.Add(workOrder);
         await dbContext.SaveChangesAsync();
 
-        var currentUser = new FakeCurrentUserService(Guid.NewGuid());
+        var currentUser = new TestCurrentUserService(Guid.NewGuid());
+        var testEventPublisher = new TestEventPublisher();
 
         var handler = new IssueInventoryCommandHandler(
             dbContext,
-            currentUser);
+            currentUser,
+            testEventPublisher);
 
         var command = new IssueInventoryCommand(
             inventoryPart.Id,
@@ -238,25 +252,14 @@ public class IssueInventoryCommandHandlerTests
             "Invalid issue");
 
         // Act & Assert
-        await Assert.ThrowsExactlyAsync<InvalidOperationException>(
-            () => handler.Handle(
-                command,
-                CancellationToken.None));
+        await Assert.ThrowsExactlyAsync<InvalidOperationException>(() => handler.Handle(command, CancellationToken.None));
 
-        var updatedInventory = await dbContext.InventoryParts
-            .FirstAsync(x => x.Id == inventoryPart.Id);
+        var updatedInventory = await dbContext.InventoryParts.FirstAsync(x => x.Id == inventoryPart.Id);
 
-        Assert.AreEqual(
-            10,
-            updatedInventory.QuantityOnHand);
-
-        Assert.AreEqual(
-            0,
-            await dbContext.InventoryUsages.CountAsync());
-
-        Assert.AreEqual(
-            0,
-            await dbContext.InventoryTransactions.CountAsync());
+        Assert.AreEqual(10, updatedInventory.QuantityOnHand);
+        Assert.AreEqual(0, await dbContext.InventoryUsages.CountAsync());
+        Assert.AreEqual(0, await dbContext.InventoryTransactions.CountAsync());
+        Assert.AreEqual(0, testEventPublisher.PublishedEvents.Count);
     }
 
     [TestMethod]
@@ -276,11 +279,13 @@ public class IssueInventoryCommandHandlerTests
         dbContext.InventoryParts.Add(inventoryPart);
         await dbContext.SaveChangesAsync();
 
-        var currentUser = new FakeCurrentUserService(Guid.NewGuid());
+        var currentUser = new TestCurrentUserService(Guid.NewGuid());
+        var testEventPublisher = new TestEventPublisher();
 
         var handler = new IssueInventoryCommandHandler(
             dbContext,
-            currentUser);
+            currentUser,
+            testEventPublisher);
 
         var command = new IssueInventoryCommand(
             inventoryPart.Id,
@@ -289,25 +294,14 @@ public class IssueInventoryCommandHandlerTests
             "Missing work order");
 
         // Act & Assert
-        await Assert.ThrowsExactlyAsync<InvalidOperationException>(
-            () => handler.Handle(
-                command,
-                CancellationToken.None));
+        await Assert.ThrowsExactlyAsync<InvalidOperationException>(() => handler.Handle(command, CancellationToken.None));
 
-        var updatedInventory = await dbContext.InventoryParts
-            .FirstAsync(x => x.Id == inventoryPart.Id);
+        var updatedInventory = await dbContext.InventoryParts.FirstAsync(x => x.Id == inventoryPart.Id);
 
-        Assert.AreEqual(
-            10,
-            updatedInventory.QuantityOnHand);
-
-        Assert.AreEqual(
-            0,
-            await dbContext.InventoryUsages.CountAsync());
-
-        Assert.AreEqual(
-            0,
-            await dbContext.InventoryTransactions.CountAsync());
+        Assert.AreEqual(10, updatedInventory.QuantityOnHand);
+        Assert.AreEqual(0, await dbContext.InventoryUsages.CountAsync());
+        Assert.AreEqual(0, await dbContext.InventoryTransactions.CountAsync());
+        Assert.AreEqual(0, testEventPublisher.PublishedEvents.Count);
     }
 
     [TestMethod]
@@ -330,11 +324,13 @@ public class IssueInventoryCommandHandlerTests
         dbContext.WorkOrders.Add(workOrder);
         await dbContext.SaveChangesAsync();
 
-        var currentUser = new FakeCurrentUserService(Guid.NewGuid());
+        var currentUser = new TestCurrentUserService(Guid.NewGuid());
+        var testEventPublisher = new TestEventPublisher();
 
         var handler = new IssueInventoryCommandHandler(
             dbContext,
-            currentUser);
+            currentUser,
+            testEventPublisher);
 
         var command = new IssueInventoryCommand(
             inventoryPart.Id,
@@ -343,25 +339,14 @@ public class IssueInventoryCommandHandlerTests
             "Work order not active");
 
         // Act & Assert
-        await Assert.ThrowsExactlyAsync<InvalidOperationException>(
-            () => handler.Handle(
-                command,
-                CancellationToken.None));
+        await Assert.ThrowsExactlyAsync<InvalidOperationException>(() => handler.Handle(command, CancellationToken.None));
 
-        var updatedInventory = await dbContext.InventoryParts
-            .FirstAsync(x => x.Id == inventoryPart.Id);
+        var updatedInventory = await dbContext.InventoryParts.FirstAsync(x => x.Id == inventoryPart.Id);
 
-        Assert.AreEqual(
-            10,
-            updatedInventory.QuantityOnHand);
-
-        Assert.AreEqual(
-            0,
-            await dbContext.InventoryUsages.CountAsync());
-
-        Assert.AreEqual(
-            0,
-            await dbContext.InventoryTransactions.CountAsync());
+        Assert.AreEqual(10, updatedInventory.QuantityOnHand);
+        Assert.AreEqual(0, await dbContext.InventoryUsages.CountAsync());
+        Assert.AreEqual(0, await dbContext.InventoryTransactions.CountAsync());
+        Assert.AreEqual(0, testEventPublisher.PublishedEvents.Count);
     }
 
     private static WorkOrder CreateInProgressWorkOrder()
