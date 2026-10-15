@@ -16,7 +16,11 @@ public class KafkaEventPublisher : IEventPublisher
 
     public async Task PublishAsync<T>(T @event, CancellationToken cancellationToken)
     {
-        var eventJson = JsonSerializer.Serialize(@event);
+        var eventJson = JsonSerializer.Serialize(new
+        {
+            EventType = @event!.GetType().Name,
+            Payload = @event
+        });
 
         var message = new Message<string, string>
         {
