@@ -29,7 +29,7 @@ catch (Exception ex)
 {
     Console.Error.WriteLine($"Test publisher failed: {ex}");
 }
-await InventoryIssuedEventTestPublisher.PublishTestEventAsync();
+
 await Task.WhenAll(workOrderTask, inventoryTask);
 
 Console.WriteLine("All consumers have stopped.");

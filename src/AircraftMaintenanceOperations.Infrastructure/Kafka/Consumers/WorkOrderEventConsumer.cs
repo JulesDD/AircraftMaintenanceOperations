@@ -39,21 +39,21 @@ public class WorkOrderEventConsumer
 
                     var envelope = JsonSerializer.Deserialize<KafkaEventEnvelope>(result.Message.Value);
 
-                    if (envelope.EventType == nameof(WorkOrderCompletedEvent))
+                    if (envelope is null)
                     {
-                        var workOrderEvent = envelope.Payload.Deserialize<WorkOrderCompletedEvent>();
-
-                        if (workOrderEvent is null)
-                        {
-                            Console.Error.WriteLine("Failed to deserialize WorkOrderCompletedEvent.");
-                            continue;
-                        }
-
-                        Console.WriteLine($"Work Order ID: {workOrderEvent.WorkOrderId}");
-                        Console.WriteLine($"Aircraft ID: {workOrderEvent.AircraftId}");
-                        Console.WriteLine($"Completed By: {workOrderEvent.CompletedByUserId}");
-                        Console.WriteLine($"Occurred At: {workOrderEvent.OccurredAt}");
+                        Console.Error.WriteLine("Failed to deserialize Kafka event envelope.");
+                        continue;
                     }
+                    if (string.IsNullOrWhiteSpace(envelope.EventType))
+                    {
+                        Console.Error.WriteLine(
+                            $"Legacy or invalid event format detected. " +
+                            $"Topic: {result.Topic}, Offset: {result.Offset}");
+
+                        continue;
+                    }
+
+                    ProcessWorkOrderEvent(envelope);
 
                     Console.WriteLine($"Topic: {result.Topic} | " + $"Partition: {result.Partition} | " + $"Offset: {result.Offset}");
                     Console.WriteLine($"Key: {result.Message.Key}");
@@ -63,6 +63,10 @@ public class WorkOrderEventConsumer
                 catch (OperationCanceledException)
                 {
                     break;
+                }
+                catch (JsonException ex)
+                {
+                    Console.Error.WriteLine($"Invalid JSON in work-order event: {ex.Message}");
                 }
                 catch (ConsumeException ex)
                 {
@@ -79,6 +83,36 @@ public class WorkOrderEventConsumer
         {
             consumer.Close();
             Console.WriteLine("Work-order consumer shut down cleanly.");
+        }
+    }
+
+    private void ProcessWorkOrderEvent(KafkaEventEnvelope envelope)
+    {
+        switch (envelope.EventType)
+        {
+            case nameof(WorkOrderCompletedEvent):
+                {
+                    var workOrderEvent =
+                        envelope.Payload.Deserialize<WorkOrderCompletedEvent>();
+
+                    if (workOrderEvent is null)
+                    {
+                        Console.Error.WriteLine(
+                            "Failed to deserialize WorkOrderCompletedEvent.");
+                        return;
+                    }
+
+                    Console.WriteLine($"Work Order ID: {workOrderEvent.WorkOrderId}");
+                    Console.WriteLine($"Aircraft ID: {workOrderEvent.AircraftId}");
+                    Console.WriteLine($"Completed By: {workOrderEvent.CompletedByUserId}");
+                    Console.WriteLine($"Occurred At: {workOrderEvent.OccurredAt}");
+                    break;
+                }
+
+            default:
+                Console.WriteLine(
+                    $"Unsupported work-order event type: {envelope.EventType}");
+                break;
         }
     }
 }
