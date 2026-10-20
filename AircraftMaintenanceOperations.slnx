@@ -8,6 +8,7 @@
     <Project Path="src/AircraftMaintenanceOperations.Application/AircraftMaintenanceOperations.Application.csproj" />
     <Project Path="src/AircraftMaintenanceOperations.Domain/AircraftMaintenanceOperations.Domain.csproj" />
     <Project Path="src/AircraftMaintenanceOperations.Infrastructure/AircraftMaintenanceOperations.Infrastructure.csproj" />
+    <Project Path="src/AircraftMaintenanceOperations.NotificationWorker/AircraftMaintenanceOperations.NotificationWorker.csproj" Id="83418fe7-5548-400b-b325-869d39b97b55" />
   </Folder>
   <Folder Name="/src/docs/">
     <File Path="ArchitectureDecisions.md" />
