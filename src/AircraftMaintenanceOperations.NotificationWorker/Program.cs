@@ -1,7 +1,19 @@
-using AircraftMaintenanceOperations.NotificationWorker;
+using AircraftMaintenanceOperations.NotificationWorker.Email;
+using AircraftMaintenanceOperations.NotificationWorker.Messaging;
 
 var builder = Host.CreateApplicationBuilder(args);
-builder.Services.AddHostedService<Worker>();
+
+var connectionString = builder.Configuration.GetConnectionString("AircraftMaintenanceConnection");
+
+if (string.IsNullOrWhiteSpace(connectionString))
+{
+    throw new InvalidOperationException("Connection string 'AircraftMaintenanceConnection' was not configured.");
+}
+
+builder.Services.AddDbContext<AircraftMaintenanceDbContext>(options => options.UseSqlServer(connectionString));
+builder.Services.AddScoped<IAircraftMaintenanceDbContext>(provider => provider.GetRequiredService<AircraftMaintenanceDbContext>());
+builder.Services.AddHostedService<WorkOrderNotificationConsumer>();
+builder.Services.AddSingleton<IEmailSender, SmtpEmailSender>();
 
 var host = builder.Build();
 host.Run();
