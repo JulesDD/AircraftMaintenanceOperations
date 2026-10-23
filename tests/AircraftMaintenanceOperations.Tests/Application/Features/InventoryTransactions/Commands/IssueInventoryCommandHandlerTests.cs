@@ -356,7 +356,8 @@ public class IssueInventoryCommandHandlerTests
 
         var assignResult = workOrder.AssignTechnician(
             technician,
-            "Technician assigned.");
+            "Technician assigned.",
+            Guid.NewGuid());
 
         Assert.IsTrue(assignResult.IsSuccess);
 

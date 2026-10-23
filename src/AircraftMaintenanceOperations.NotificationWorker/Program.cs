@@ -1,6 +1,3 @@
-using AircraftMaintenanceOperations.NotificationWorker.Email;
-using AircraftMaintenanceOperations.NotificationWorker.Messaging;
-
 var builder = Host.CreateApplicationBuilder(args);
 
 var connectionString = builder.Configuration.GetConnectionString("AircraftMaintenanceConnection");

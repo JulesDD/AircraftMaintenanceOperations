@@ -67,7 +67,7 @@ public class InspectionCommandHandlerTests
             "Create a test work order for unit testing.");
 
         
-        var assignResult = workOrder.AssignTechnician(technician, "Assigning technician for testing.");
+        var assignResult = workOrder.AssignTechnician(technician, "Assigning technician for testing.", Guid.NewGuid());
         Assert.IsTrue(assignResult.IsSuccess, assignResult.ErrorMessage);
 
         var startResult = workOrder.InProgress("Maintenance work completed.");

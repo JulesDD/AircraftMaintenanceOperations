@@ -47,6 +47,7 @@ public class CompletedWorkOrderCommandHanderTests
     {
         // Arrange
         await using var dbContext = CreateDbContext();
+        var assignedByUserId = Guid.NewGuid();
 
         var technician = Technician.Create(
             "TECH-001",
@@ -67,7 +68,7 @@ public class CompletedWorkOrderCommandHanderTests
             DateTime.UtcNow.AddDays(7),
             "Initial maintenance note");
 
-        var assignResult = workOrder.AssignTechnician(technician, "Technician assigned");
+        var assignResult = workOrder.AssignTechnician(technician, "Technician assigned", assignedByUserId);
         Assert.IsTrue(assignResult.IsSuccess);
 
         var inProgressResult = workOrder.InProgress("Maintenance work started");
@@ -140,6 +141,7 @@ public class CompletedWorkOrderCommandHanderTests
     {
         // Arrange
         await using var dbContext = CreateDbContext();
+        var assignedByUserId = Guid.NewGuid();
 
         var technician = Technician.Create(
             "TECH-002",
@@ -160,7 +162,7 @@ public class CompletedWorkOrderCommandHanderTests
             DateTime.UtcNow.AddDays(7),
             "Initial maintenance note");
 
-        var assignResult = workOrder.AssignTechnician(technician, "Technician assigned");
+        var assignResult = workOrder.AssignTechnician(technician, "Technician assigned", assignedByUserId);
         Assert.IsTrue(assignResult.IsSuccess);
 
         var inProgressResult = workOrder.InProgress("Maintenance work started");
@@ -197,6 +199,7 @@ public class CompletedWorkOrderCommandHanderTests
     {
         // Arrange
         await using var dbContext = CreateDbContext();
+        var assignedByUserId = Guid.NewGuid();
 
         var technician = Technician.Create(
             "TECH-003",
@@ -217,9 +220,7 @@ public class CompletedWorkOrderCommandHanderTests
             DateTime.UtcNow.AddDays(7),
             "Initial maintenance note");
 
-        var assignResult = workOrder.AssignTechnician(
-            technician,
-            "Technician assigned");
+        var assignResult = workOrder.AssignTechnician(technician, "Technician assigned", assignedByUserId);
 
         Assert.IsTrue(assignResult.IsSuccess);
 
@@ -257,6 +258,7 @@ public class CompletedWorkOrderCommandHanderTests
     {
         // Arrange
         await using var dbContext = CreateDbContext();
+        var assignedByUserId = Guid.NewGuid();
 
         var technician = Technician.Create(
             "TECH-004",
@@ -277,9 +279,7 @@ public class CompletedWorkOrderCommandHanderTests
             DateTime.UtcNow.AddDays(7),
             "Initial maintenance note");
 
-        var assignResult = workOrder.AssignTechnician(
-            technician,
-            "Technician assigned");
+        var assignResult = workOrder.AssignTechnician(technician, "Technician assigned", assignedByUserId);
 
         Assert.IsTrue(assignResult.IsSuccess);
 
@@ -315,6 +315,7 @@ public class CompletedWorkOrderCommandHanderTests
     {
         // Arrange
         await using var dbContext = CreateDbContext();
+        var assignedByUserId = Guid.NewGuid();
 
         var technician = Technician.Create(
             "TECH-005",
@@ -335,7 +336,7 @@ public class CompletedWorkOrderCommandHanderTests
             DateTime.UtcNow.AddDays(7),
             "Initial maintenance note");
 
-        var assignResult = workOrder.AssignTechnician(technician, "Technician assigned");
+        var assignResult = workOrder.AssignTechnician(technician, "Technician assigned", assignedByUserId);
         Assert.IsTrue(assignResult.IsSuccess);
 
         var inProgressResult = workOrder.InProgress("Maintenance work started");

@@ -8,9 +8,8 @@ public class AssignTechnicianCommandHandler(IAircraftMaintenanceDbContext DbCont
         var workOrder = await DbContext.WorkOrders.FindAsync([command.WorkOrderId], cancellationToken);
         if (technician is null || workOrder is null) return new AssignTechnicianResult(false, "Technician or work order not found.");
 
-
-        var assignTech = workOrder.AssignTechnician(technician, command.LaborNotes);
         var assignedByUserId = await CurrentUser.GetDomainUserIdAsync(cancellationToken);
+        var assignTech = workOrder.AssignTechnician(technician, command.LaborNotes, assignedByUserId);
         
 
         if (!assignTech.IsSuccess) return new AssignTechnicianResult(false, assignTech.ErrorMessage);

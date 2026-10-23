@@ -10,6 +10,7 @@ public class WorkOrder : BaseEntity
     public Guid AircraftId { get; private set; }
     public Aircraft Aircraft { get; private set; }
     public Guid AssignedTechnicianId { get; private set; }
+    public Guid? AssignedByUserId { get; private set; }
     public MaintenancePriority WorkOrderPriority { get; private set; }
     public WorkOrderStatus WorkOrderStatus { get; private set; }
     public DateTime EstimatedCompletionDate { get; private set; }
@@ -68,7 +69,7 @@ public class WorkOrder : BaseEntity
         WorkOrderPriority = MaintenancePriority.Critical;
     }
 
-    public DomainResult AssignTechnician(Technician technician, string laborNotes)
+    public DomainResult AssignTechnician(Technician technician, string laborNotes, Guid assignedByUserId)
     {
         if (technician is null) return new(false, "Invalid technician.");
         if (WorkOrderStatus == WorkOrderStatus.Archived) return new(false, "Archived work orders cannot be assigned to a technician.");
@@ -76,6 +77,7 @@ public class WorkOrder : BaseEntity
         if(string.IsNullOrWhiteSpace(laborNotes)) return new(false, "A status note is required.");
 
         AssignedTechnicianId = technician.Id;
+        AssignedByUserId = assignedByUserId;
         WorkOrderStatus = WorkOrderStatus.Assigned;
         LaborNotes = laborNotes;
         return new(true);

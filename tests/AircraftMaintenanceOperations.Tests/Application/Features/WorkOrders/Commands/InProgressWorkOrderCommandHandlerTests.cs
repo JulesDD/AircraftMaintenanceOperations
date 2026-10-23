@@ -85,7 +85,8 @@ public class InProgressWorkOrderCommandHandlerTests
         // Assign the technician so the Work Order can enter InProgress.
         var assignmentResult = workOrder.AssignTechnician(
             technician,
-            "Assign technician for unit testing.");
+            "Assign technician for unit testing.",
+            Guid.NewGuid());
 
         Assert.IsTrue(
             assignmentResult.IsSuccess,

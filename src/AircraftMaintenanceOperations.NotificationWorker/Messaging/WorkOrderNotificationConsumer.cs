@@ -88,13 +88,24 @@ public class WorkOrderNotificationConsumer : BackgroundService
 
     private async Task ProcessEventAsync(KafkaEventEnvelope envelope, CancellationToken cancellationToken)
     {
-        if (envelope.EventType != nameof(TechnicianAssignedToWorkOrderEvent))
+        switch (envelope.EventType)
         {
-            _logger.LogDebug("Skipping unsupported event type {EventType}.", envelope.EventType);
+            case nameof(TechnicianAssignedToWorkOrderEvent): await ProcessTechnicianAssignedAsync(envelope, cancellationToken);
+                break;
 
-            return;
-        }
+            case nameof(WorkOrderCompletedEvent): await ProcessWorkOrderCompletedAsync(envelope, cancellationToken);
+                break;
 
+            default:
+                _logger.LogDebug(
+                    "Skipping unsupported event type {EventType}.",
+                    envelope.EventType);
+                break;
+        }      
+    }
+
+    private async Task ProcessTechnicianAssignedAsync(KafkaEventEnvelope envelope, CancellationToken cancellationToken)
+    {
         var assignedEvent = envelope.Payload.Deserialize<TechnicianAssignedToWorkOrderEvent>();
 
         if (assignedEvent is null)
@@ -135,6 +146,65 @@ public class WorkOrderNotificationConsumer : BackgroundService
         await _emailSender.SendAsync(email, cancellationToken);
 
         _logger.LogInformation("Sent assignment notification to technician {TechnicianId} for work order {WorkOrderId}.", technician.Id, assignedEvent.WorkOrderId);
+    }
+
+
+    private async Task ProcessWorkOrderCompletedAsync(KafkaEventEnvelope envelope, CancellationToken cancellationToken)
+    {
+        var completedEvent = envelope.Payload.Deserialize<WorkOrderCompletedEvent>();
+        if (completedEvent is null)
+        {
+            _logger.LogWarning("Could not deserialize work order completion event.");
+            return;
+        }
+
+        using var scope = _scopeFactory.CreateScope();
+
+        var dbContext = scope.ServiceProvider.GetRequiredService<IAircraftMaintenanceDbContext>();
+
+        var workOrder = await dbContext.WorkOrders.FindAsync([completedEvent.WorkOrderId], cancellationToken);
+        if (workOrder is null)
+        {
+            _logger.LogWarning("Work order {WorkOrderId} was not found for completion notification.", completedEvent.WorkOrderId);
+            return;
+        }
+
+        if (workOrder.AssignedByUserId is not Guid assignedByUserId)
+        {
+            _logger.LogWarning("Work order {WorkOrderId} has no recorded assigning user.", workOrder.Id);
+            return;
+        }
+
+        var technician = await dbContext.Technicians.FindAsync([workOrder.AssignedTechnicianId], cancellationToken);
+
+        if (technician is null)
+        {
+            _logger.LogWarning("Assigned technician {TechnicianId} was not found for work order {WorkOrderId}.", workOrder.AssignedTechnicianId, workOrder.Id);
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(technician.Email))
+        {
+            _logger.LogWarning("Technician {TechnicianId} has no email address.", technician.Id);
+            return;
+        }
+
+        var email = new EmailMessage(
+            technician.Email,
+            $"Work order {workOrder.Id} completed",
+            $"""
+            Hello {technician.FirstName},
+
+            Work order {workOrder.Id} has been completed.
+            Aircraft: {completedEvent.AircraftId}
+
+            Thank you,
+            Airport Operations Platform
+            """);
+
+        await _emailSender.SendAsync(email, cancellationToken);
+
+        _logger.LogInformation("Sent completion notification to technician {TechnicianId} for work order {WorkOrderId}.", technician.Id, workOrder.Id);
     }
 
 }

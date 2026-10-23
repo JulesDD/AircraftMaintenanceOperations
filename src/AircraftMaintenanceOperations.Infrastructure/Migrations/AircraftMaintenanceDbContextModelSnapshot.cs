@@ -376,6 +376,9 @@ namespace AircraftMaintenanceOperations.Infrastructure.Migrations
                     b.Property<Guid>("AircraftId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("AssignedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid>("AssignedTechnicianId")
                         .HasColumnType("uniqueidentifier");
 
