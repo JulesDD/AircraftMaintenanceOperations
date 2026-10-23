@@ -13,25 +13,26 @@ architectural decision-making.
 
 ## 🚀 Project Status
 
-  Module / Capability                                              Status
-  ------------------------------------------------ --------------------------------------
-  Aircraft Management                                           ✅ Complete
-  Pilot Management                                              ✅ Complete
-  Technician Management                                         ✅ Complete
-  Maintenance Requests                                          ✅ Complete
-  Work Orders                                                   ✅ Complete
-  Inventory Management and Audit History                        ✅ Complete
-  Authentication and Role-Based Authorization                   ✅ Complete
-  Employee / User / Role / Profile Foundation                   ✅ Complete
-  Inventory Hardening and Technical-Debt Cleanup                ✅ Complete
-  Kafka Event Messaging                                        ✅ Implemented
-  Notification Worker --- Email                     ✅ Implemented and end-to-end tested
-  SMTP Failure / Recovery Verification                           ✅ Tested
-  Work Order Lifecycle & Control Improvements                     ⏭️ Next
-  Reporting and Analytics                                        📅 Planned
-  Security and API Hardening                                     📅 Planned
-  React Frontend                                                 📅 Planned
-  Deployment / CI/CD / Cloud                                     📅 Planned
+ | Module | Status |
+|---------|:------:|
+| Aircraft Management | ✅ Complete |
+| Pilot Management  | ✅ Complete |
+| Technician Management | ✅ Complete |
+| Work Orders | ✅ Complete |
+| Maintenance Requests | ✅ Complete |
+| Inventory Management and Audit History  | ✅ Complete |
+| Authentication & Authorization | ✅ Complete |
+| Employee / User / Role / Profile Foundation | ✅ Complete |
+| Inventory Hardening | ✅ Complete |
+| Technical Debt Cleanup | ✅ Complete |
+| Kafka Messaging |  ✅ Implemented |
+| Notification Worker --- Email  | ✅ Implemented and end-to-end tested |
+| SMTP Failure / Recovery Verification   | ✅ Tested |
+| Work Order Lifecycle & Control Improvements | ⏭️ Next |
+| Reporting and Analytics | 📅 Planned |
+| Security & API Hardening | 📅 Planned |
+| React Frontend | 📅 Planned |
+| Docker Deployment | 📅 Planned |
 
 **Current milestone: Sprint 11 --- Notification Service implemented and
 verified; documentation and retrospective closeout.**
