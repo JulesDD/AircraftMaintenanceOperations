@@ -5,7 +5,8 @@ public enum WorkOrderStatus
     Open,
     Assigned,
     InProgress,
-    WaitingForParts,
+    Concluded,
+    OnHold,
     Inspection,
     Completed,
     Archived
