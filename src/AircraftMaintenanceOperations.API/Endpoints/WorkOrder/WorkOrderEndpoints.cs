@@ -1,4 +1,6 @@
-﻿namespace AircraftMaintenanceOperations.API.Endpoints.WorkOrder;
+﻿
+
+namespace AircraftMaintenanceOperations.API.Endpoints.WorkOrder;
 
 public class WorkOrderEndpoints : ICarterModule
 {
@@ -92,6 +94,18 @@ public class WorkOrderEndpoints : ICarterModule
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .WithSummary("Updates a work order to in-progress status.")
             .WithDescription("Update Work Order to In Progress");
+
+        group.MapPatch("/{id:guid}/concluded", async (Guid id, ConcludedWorkOrderCommand command, ISender sender) =>
+        {
+            var update = command with { WorkOrderId = id };
+            var result = await sender.Send(update);
+            return result.IsConcluded ? Results.Ok(result) : Results.BadRequest(result);
+        })
+            .WithName("ConcludeWorkOrder")
+            .Produces<ConcludedWorkOrderResult>(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status400BadRequest)
+            .WithSummary("Updates a work order to concluded status.")
+            .WithDescription("Update Work Order to Concluded");
 
         group.MapPatch("/{id:guid}/inspection", async (Guid id, InspectionCommand command, ISender sender) =>
         {
