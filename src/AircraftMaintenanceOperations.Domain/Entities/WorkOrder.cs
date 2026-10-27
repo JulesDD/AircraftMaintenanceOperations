@@ -171,4 +171,22 @@ public class WorkOrder : BaseEntity
         LaborNotes = laborNotes;
         return new(true);
     }
+
+    public DomainResult InspectWorkOrderResult(bool isInspected, string inspectionNotes)
+    {
+        if (string.IsNullOrWhiteSpace(inspectionNotes)) return new(false, "Inspection notes are required.");
+        if (WorkOrderStatus != WorkOrderStatus.Inspection) return new(false, "Only work orders in inspection can be inspected.");
+        if (isInspected)
+        {
+            WorkOrderStatus = WorkOrderStatus.Inspection;
+            LaborNotes = inspectionNotes;
+            return new(true);
+        }
+        else
+        {
+            WorkOrderStatus = WorkOrderStatus.InProgress;
+            LaborNotes = inspectionNotes;
+            return new(true);
+        }
+    }
 }

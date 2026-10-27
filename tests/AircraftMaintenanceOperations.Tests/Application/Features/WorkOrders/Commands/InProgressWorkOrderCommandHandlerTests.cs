@@ -88,15 +88,12 @@ public class InProgressWorkOrderCommandHandlerTests
             "Assign technician for unit testing.",
             Guid.NewGuid());
 
-        Assert.IsTrue(
-            assignmentResult.IsSuccess,
-            assignmentResult.ErrorMessage);
+        Assert.IsTrue(assignmentResult.IsSuccess, assignmentResult.ErrorMessage);
 
         await dbContext.SaveChangesAsync();
 
         // The assigned technician is the current user.
-        var currentUserService =
-            new TestCurrentUserService(technician.Id);
+        var currentUserService = new TestCurrentUserService(technician.Id);
 
         var eventPublisher = new TestEventPublisher();
 
@@ -120,29 +117,14 @@ public class InProgressWorkOrderCommandHandlerTests
         Assert.IsTrue(result.IsInProgress);
 
         // Assert: exactly one event was published.
-        Assert.AreEqual(
-            1,
-            eventPublisher.PublishedEvents.Count);
+        Assert.AreEqual(1,eventPublisher.PublishedEvents.Count);
 
-        var publishedEvent = eventPublisher.PublishedEvents
-            .OfType<WorkOrderInProgressEvent>()
-            .Single();
+        var publishedEvent = eventPublisher.PublishedEvents.OfType<WorkOrderInProgressEvent>().Single();
 
         // Assert: the event contains the correct details.
-        Assert.AreEqual(
-            workOrder.Id,
-            publishedEvent.WorkOrderId);
-
-        Assert.AreEqual(
-            technician.Id,
-            publishedEvent.StartedByUserId);
-
-        Assert.AreNotEqual(
-            Guid.Empty,
-            publishedEvent.EventId);
-
-        Assert.AreNotEqual(
-            default(DateTimeOffset),
-            publishedEvent.OccurredAt);
+        Assert.AreEqual(workOrder.Id, publishedEvent.WorkOrderId);
+        Assert.AreEqual(technician.Id, publishedEvent.StartedByUserId);
+        Assert.AreNotEqual(Guid.Empty, publishedEvent.EventId);
+        Assert.AreNotEqual(default(DateTimeOffset), publishedEvent.OccurredAt);
     }
 }
