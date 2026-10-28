@@ -35,6 +35,7 @@ public class KafkaEventPublisher : IEventPublisher
     {
         return @event switch
         {
+            WorkOrderConcludedEvent => "work-order-events",
             WorkOrderCompletedEvent => "work-order-events",
             WorkOrderCreatedEvent => "work-order-events",
             TechnicianAssignedToWorkOrderEvent => "work-order-events",
@@ -74,6 +75,10 @@ public class KafkaEventPublisher : IEventPublisher
 
             InventoryReceivedEvent inventoryReceivedEvent =>
                 inventoryReceivedEvent.InventoryPartId.ToString(),
+
+            WorkOrderConcludedEvent workOrderConcludedEvent =>
+                workOrderConcludedEvent.WorkOrderId.ToString(),
+
             _ => throw new InvalidOperationException(
                 $"No Kafka key configured for event type {typeof(T).Name}.")
         };

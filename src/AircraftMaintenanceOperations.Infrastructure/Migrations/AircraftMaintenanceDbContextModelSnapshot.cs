@@ -382,6 +382,9 @@ namespace AircraftMaintenanceOperations.Infrastructure.Migrations
                     b.Property<Guid>("AssignedTechnicianId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("CompletedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime?>("CreatedDate")
                         .HasColumnType("datetime2");
 
@@ -390,6 +393,15 @@ namespace AircraftMaintenanceOperations.Infrastructure.Migrations
 
                     b.Property<DateTime>("EstimatedCompletionDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("HoldDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("HoldNotes")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("HoldReason")
+                        .HasColumnType("int");
 
                     b.Property<decimal>("LaborHours")
                         .HasPrecision(8, 2)
@@ -405,6 +417,9 @@ namespace AircraftMaintenanceOperations.Infrastructure.Migrations
 
                     b.Property<DateTime?>("ModifiedDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<int?>("PreviousStatus")
+                        .HasColumnType("int");
 
                     b.Property<string>("Title")
                         .HasColumnType("nvarchar(max)");
