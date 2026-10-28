@@ -1,4 +1,6 @@
-﻿namespace AircraftMaintenanceOperations.NotificationWorker.Messaging;
+﻿using AircraftMaintenanceOperations.Domain.Enums;
+
+namespace AircraftMaintenanceOperations.NotificationWorker.Messaging;
 
 public class WorkOrderNotificationConsumer : BackgroundService
 {
@@ -96,10 +98,11 @@ public class WorkOrderNotificationConsumer : BackgroundService
             case nameof(WorkOrderCompletedEvent): await ProcessWorkOrderCompletedAsync(envelope, cancellationToken);
                 break;
 
+            case nameof(WorkOrderConcludedEvent): await ProcessWorkOrderConcludedAsync(envelope, cancellationToken);
+                break;
+
             default:
-                _logger.LogDebug(
-                    "Skipping unsupported event type {EventType}.",
-                    envelope.EventType);
+                _logger.LogDebug("Skipping unsupported event type {EventType}.", envelope.EventType);
                 break;
         }      
     }
@@ -107,7 +110,6 @@ public class WorkOrderNotificationConsumer : BackgroundService
     private async Task ProcessTechnicianAssignedAsync(KafkaEventEnvelope envelope, CancellationToken cancellationToken)
     {
         var assignedEvent = envelope.Payload.Deserialize<TechnicianAssignedToWorkOrderEvent>();
-
         if (assignedEvent is null)
         {
             _logger.LogWarning("Could not deserialize technician assignment event.");
@@ -147,7 +149,6 @@ public class WorkOrderNotificationConsumer : BackgroundService
 
         _logger.LogInformation("Sent assignment notification to technician {TechnicianId} for work order {WorkOrderId}.", technician.Id, assignedEvent.WorkOrderId);
     }
-
 
     private async Task ProcessWorkOrderCompletedAsync(KafkaEventEnvelope envelope, CancellationToken cancellationToken)
     {
@@ -205,6 +206,58 @@ public class WorkOrderNotificationConsumer : BackgroundService
         await _emailSender.SendAsync(email, cancellationToken);
 
         _logger.LogInformation("Sent completion notification to technician {TechnicianId} for work order {WorkOrderId}.", technician.Id, workOrder.Id);
+    }
+
+    private async Task ProcessWorkOrderConcludedAsync(KafkaEventEnvelope envelope, CancellationToken cancellationToken)
+    {
+        var concludedEvent = envelope.Payload.Deserialize<WorkOrderConcludedEvent>();
+        if (concludedEvent is null)
+        {
+            _logger.LogWarning("Could not deserialize work order conclusion event.");
+            return;
+        }
+
+        using var scope = _scopeFactory.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<IAircraftMaintenanceDbContext>();
+        var supervisors = await dbContext.Users.Where(user => user.Role == Role.MaintenanceSupervisor && user.Status == EmploymentStatus.Active).ToListAsync(cancellationToken);
+        if(supervisors.Count == 0)
+        {
+            _logger.LogWarning("No active maintenance supervisors found for work order {WorkOrderId}.", concludedEvent.WorkOrderId);
+            return;
+        }
+
+
+        var workOrder = await dbContext.WorkOrders.FindAsync([concludedEvent.WorkOrderId], cancellationToken);
+        if (workOrder is null)
+        {
+            _logger.LogWarning("Work order {WorkOrderId} was not found for conclusion notification.", concludedEvent.WorkOrderId);
+            return;
+        }
+        if (workOrder.AssignedByUserId is not Guid assignedByUserId)
+        {
+            _logger.LogWarning("Work order {WorkOrderId} has no recorded assigning user.", workOrder.Id);
+            return;
+        }
+
+        foreach (var supervisor in supervisors)
+        {
+            var email = new EmailMessage(
+                supervisor.Email,
+                $"Work order {workOrder.Id} requires inspection",
+                $"""
+                Hello {supervisor.FirstName},
+
+                Work order {workOrder.Id} has been concluded
+                and is awaiting inspection.
+
+                Labor notes: {concludedEvent.LaborNotes}
+
+                Please review it in the Airport Maintenance
+                Operations Platform.
+                """);
+
+            await _emailSender.SendAsync(email, cancellationToken);
+        }
     }
 
 }
