@@ -1,4 +1,5 @@
 ﻿global using AircraftMaintenanceOperations.Application.Interfaces;
+global using AircraftMaintenanceOperations.Domain.Enums;
 global using AircraftMaintenanceOperations.Domain.Events;
 global using AircraftMaintenanceOperations.Infrastructure.Kafka;
 global using AircraftMaintenanceOperations.Infrastructure.Persistence.Context;

@@ -1,6 +1,4 @@
-﻿using AircraftMaintenanceOperations.Domain.Enums;
-
-namespace AircraftMaintenanceOperations.NotificationWorker.Messaging;
+﻿namespace AircraftMaintenanceOperations.NotificationWorker.Messaging;
 
 public class WorkOrderNotificationConsumer : BackgroundService
 {
