@@ -116,15 +116,18 @@ public class WorkOrder : BaseEntity
 
     public DomainResult OnHold(HoldReason? holdReason, string holdNotes)
     {
-        if (string.IsNullOrWhiteSpace(holdNotes)) return new(false, "Hold notes are required.");
+        if (WorkOrderStatus == WorkOrderStatus.OnHold) return new(false, "Work order is already on hold.");
         if (WorkOrderStatus != WorkOrderStatus.Assigned && WorkOrderStatus != WorkOrderStatus.InProgress) return new(false, "Only assigned or in-progress work orders can be put on hold.");
+        if (PreviousStatus != null) return new(false, "Work order has an existing previous status.");
         if (holdReason is null || !Enum.IsDefined(holdReason.Value)) return new(false, "A valid hold reason is required.");
+        if (string.IsNullOrWhiteSpace(holdNotes)) return new(false, "Hold notes are required.");
 
         HoldReason = holdReason.Value;
         PreviousStatus = WorkOrderStatus;
         WorkOrderStatus = WorkOrderStatus.OnHold;
-        HoldNotes = holdNotes;
+        HoldNotes = holdNotes.Trim();
         HoldDate = DateTime.UtcNow;
+
         return new(true);
     }
 
