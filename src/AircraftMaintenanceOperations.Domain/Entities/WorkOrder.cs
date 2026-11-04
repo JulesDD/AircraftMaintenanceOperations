@@ -17,7 +17,7 @@ public class WorkOrder : BaseEntity
     public DateTime EstimatedCompletionDate { get; private set; }
     public DateTime? ActualCompletionDate { get; private set; }
     public DateTime? HoldDate { get; private set; }
-    public WorkOrderStatus? PreviousStatus { get; private set; }
+    public WorkOrderStatus? PreviousStatus { get; set; }
     public decimal LaborHours { get; private set; }
     public string? LaborNotes { get; private set; }
     public HoldReason? HoldReason { get; private set; }
@@ -134,9 +134,7 @@ public class WorkOrder : BaseEntity
     public DomainResult ResumeFromHold(string laborNotes)
     {
         if (string.IsNullOrWhiteSpace(laborNotes)) return new(false, "A status note is required.");
-
         if (WorkOrderStatus != WorkOrderStatus.OnHold) return new(false, "Only work orders on hold can be resumed.");
-
         if (PreviousStatus != WorkOrderStatus.InProgress && PreviousStatus != WorkOrderStatus.Assigned) return new(false, "The previous work order status cannot be restored.");
 
         WorkOrderStatus = PreviousStatus.Value;

@@ -358,4 +358,175 @@ public class WorkOrderTests
         Assert.IsFalse(holdResult.IsSuccess);
         Assert.AreEqual("A valid hold reason is required.", holdResult.ErrorMessage);
     }
+
+    [TestMethod]
+    public void ResumeFromHold_WhenWorkOrderIsOnHold_ChangesStatusToPreviousStatus()
+    {
+        // Arrange
+        var workOrder = WorkOrder.Create(
+            "WO-TEST-008",
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            MaintenancePriority.Medium,
+            DateTime.UtcNow.AddDays(7),
+            "Initial work order notes.");
+        var technician = Technician.Create(
+            "EMP321",
+            "Bob",
+            "Williams",
+            "bob.williams@test.com",
+            "555-3456",
+            CertificationLevel.Senior,
+            7);
+
+        var assignmentResult = workOrder.AssignTechnician(technician, "Assigning technician.", Guid.NewGuid());
+        Assert.IsTrue(assignmentResult.IsSuccess, assignmentResult.ErrorMessage);
+
+        var startResult = workOrder.InProgress("Starting work order.");
+        Assert.IsTrue(startResult.IsSuccess, startResult.ErrorMessage);
+
+        var holdResult = workOrder.OnHold(HoldReason.Parts, "Waiting for parts to arrive.");
+        Assert.IsTrue(holdResult.IsSuccess, holdResult.ErrorMessage);
+
+        // Act
+        var resumeResult = workOrder.ResumeFromHold("Resuming work order after parts arrived.");
+        Assert.IsTrue(resumeResult.IsSuccess, resumeResult.ErrorMessage);
+        Assert.AreEqual(WorkOrderStatus.InProgress, workOrder.WorkOrderStatus);
+        Assert.AreEqual("Resuming work order after parts arrived.", workOrder.LaborNotes);
+    }
+
+    [TestMethod]
+    public void ResumeFromHold_WhenWorkOrderIsNotOnHold_ReturnsError()
+    {
+        // Arrange
+        var workOrder = WorkOrder.Create(
+            "WO-TEST-009",
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            MaintenancePriority.Medium,
+            DateTime.UtcNow.AddDays(7),
+            "Initial work order notes.");
+        var technician = Technician.Create(
+            "EMP654",
+            "Charlie",
+            "Brown",
+            "charlie.brown@test.com",
+            "555-6789",
+            CertificationLevel.Senior,
+            7);
+
+        var assignmentResult = workOrder.AssignTechnician(technician, "Assigning technician.", Guid.NewGuid());
+        Assert.IsTrue(assignmentResult.IsSuccess, assignmentResult.ErrorMessage);
+
+        var resumeResult = workOrder.ResumeFromHold("Attempting to resume work order that is not on hold.");
+        Assert.IsFalse(resumeResult.IsSuccess);
+        Assert.AreEqual("Only work orders on hold can be resumed.", resumeResult.ErrorMessage);
+    }
+
+    [TestMethod]
+    public void ResumeFromHold_WhenPreviousStatusIsNull_ReturnsError()
+    {
+        // Arrange
+        var workOrder = WorkOrder.Create(
+            "WO-TEST-009",
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            MaintenancePriority.Medium,
+            DateTime.UtcNow.AddDays(7),
+            "Initial work order notes.");
+        var technician = Technician.Create(
+            "EMP654",
+            "Charlie",
+            "Brown",
+            "charlie.brown@test.com",
+            "555-6789",
+            CertificationLevel.Senior,
+            7);
+
+        var assignmentResult = workOrder.AssignTechnician(technician, "Assigning technician.", Guid.NewGuid());
+        Assert.IsTrue(assignmentResult.IsSuccess, assignmentResult.ErrorMessage);
+
+        var startResult = workOrder.InProgress("Starting work order.");
+        Assert.IsTrue(startResult.IsSuccess, startResult.ErrorMessage);
+
+        var holdResult = workOrder.OnHold(HoldReason.Parts, "Waiting for parts to arrive.");
+        Assert.IsTrue(holdResult.IsSuccess, holdResult.ErrorMessage);
+
+        // Manually set PreviousStatus to null to simulate the edge case
+        workOrder.PreviousStatus = null;
+
+        var resumeResult = workOrder.ResumeFromHold("Attempting to resume work order with null previous status.");
+        Assert.IsFalse(resumeResult.IsSuccess);
+        Assert.AreEqual("The previous work order status cannot be restored.", resumeResult.ErrorMessage);
+    }
+
+    [TestMethod]
+    public void ResumeFromHold_WhenLaborNotesAreNull_ReturnsError()
+    {
+        // Arrange
+        var workOrder = WorkOrder.Create(
+            "WO-TEST-009",
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            MaintenancePriority.Medium,
+            DateTime.UtcNow.AddDays(7),
+            "Initial work order notes.");
+        var technician = Technician.Create(
+            "EMP654",
+            "Charlie",
+            "Brown",
+            "charlie.brown@test.com",
+            "555-6789",
+            CertificationLevel.Senior,
+            7);
+
+        var assignmentResult = workOrder.AssignTechnician(technician, "Assigning technician.", Guid.NewGuid());
+        Assert.IsTrue(assignmentResult.IsSuccess, assignmentResult.ErrorMessage);
+
+        var startResult = workOrder.InProgress("Starting work order.");
+        Assert.IsTrue(startResult.IsSuccess, startResult.ErrorMessage);
+
+        var holdResult = workOrder.OnHold(HoldReason.Parts, "Waiting for parts to arrive.");
+        Assert.IsTrue(holdResult.IsSuccess, holdResult.ErrorMessage);
+
+        var resumeResult = workOrder.ResumeFromHold(null);
+        Assert.IsFalse(resumeResult.IsSuccess);
+        Assert.AreEqual("A status note is required.", resumeResult.ErrorMessage);
+    }
+
+    [TestMethod]
+    public void ResumeFromHold_WhenPreviousStatusWasAssigned_RestoresAssignedStatus()
+    {
+        // Arrange
+        var workOrder = WorkOrder.Create(
+            "WO-TEST-009",
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            MaintenancePriority.Medium,
+            DateTime.UtcNow.AddDays(7),
+            "Initial work order notes.");
+
+        var technician = Technician.Create(
+            "EMP654",
+            "Charlie",
+            "Brown",
+            "charlie.brown@test.com",
+            "555-6789",
+            CertificationLevel.Senior,
+            7);
+
+        var assignmentResult = workOrder.AssignTechnician(technician, "Assigning technician.", Guid.NewGuid());
+        Assert.IsTrue(assignmentResult.IsSuccess, assignmentResult.ErrorMessage);
+
+        var holdResult = workOrder.OnHold(HoldReason.Parts, "Waiting for parts to arrive.");
+        Assert.IsTrue(holdResult.IsSuccess, holdResult.ErrorMessage);
+        Assert.AreEqual(WorkOrderStatus.Assigned, workOrder.PreviousStatus);
+
+        // Act
+        var resumeResult = workOrder.ResumeFromHold("Resuming work order after parts arrived.");
+
+        Assert.IsTrue(resumeResult.IsSuccess, resumeResult.ErrorMessage);
+        Assert.AreEqual(WorkOrderStatus.Assigned, workOrder.WorkOrderStatus);
+        Assert.IsNull(workOrder.PreviousStatus);
+    }
 }
