@@ -9,6 +9,8 @@ global using AircraftMaintenanceOperations.Application.Features.WorkOrders.Comma
 global using AircraftMaintenanceOperations.Application.Features.WorkOrders.Command.CreateWorkOrderCommand;
 global using AircraftMaintenanceOperations.Application.Features.WorkOrders.Command.InProgressCommand;
 global using AircraftMaintenanceOperations.Application.Features.WorkOrders.Command.InspectionCommand;
+global using AircraftMaintenanceOperations.Application.Features.WorkOrders.Command.OnHoldWorkOrderCommand;
+global using AircraftMaintenanceOperations.Application.Features.WorkOrders.Command.ResumeWorkOrderCommand;
 global using AircraftMaintenanceOperations.Domain.Entities;
 global using AircraftMaintenanceOperations.Domain.Enums;
 global using AircraftMaintenanceOperations.Domain.Events;

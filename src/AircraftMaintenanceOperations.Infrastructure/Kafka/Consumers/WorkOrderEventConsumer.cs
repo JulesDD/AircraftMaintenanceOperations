@@ -186,6 +186,45 @@ public class WorkOrderEventConsumer
                     break;
                 }
 
+            case nameof(WorkOrderOnHoldEvent):
+                {
+                    var workOrderEvent = envelope.Payload.Deserialize<WorkOrderOnHoldEvent>();
+
+                    if (workOrderEvent is null)
+                    {
+                        Console.Error.WriteLine("Failed to deserialize WorkOrderOnHoldEvent.");
+                        return;
+                    }
+
+                    Console.WriteLine("WorkOrderOnHoldEvent processed.");
+                    Console.WriteLine($"Work Order ID: {workOrderEvent.WorkOrderId}");
+                    Console.WriteLine($"Placed On Hold By: {workOrderEvent.OnHoldByUserId}");
+                    Console.WriteLine($"Hold Reason: {workOrderEvent.HoldReason}");
+                    Console.WriteLine($"Hold Notes: {workOrderEvent.HoldNotes}");
+                    Console.WriteLine($"Previous Status: {workOrderEvent.PreviousStatus}");
+                    Console.WriteLine($"Occurred At: {workOrderEvent.OccurredAt}");
+                    break;
+                }
+
+            case nameof(WorkOrderResumedEvent):
+                {
+                    var workOrderEvent = envelope.Payload.Deserialize<WorkOrderResumedEvent>();
+
+                    if (workOrderEvent is null)
+                    {
+                        Console.Error.WriteLine("Failed to deserialize WorkOrderResumedEvent.");
+                        return;
+                    }
+
+                    Console.WriteLine("WorkOrderResumedEvent processed.");
+                    Console.WriteLine($"Work Order ID: {workOrderEvent.WorkOrderId}");
+                    Console.WriteLine($"Resumed By: {workOrderEvent.ResumedByUserId}");
+                    Console.WriteLine($"Resume Notes: {workOrderEvent.ResumeNotes}");
+                    Console.WriteLine($"Restored Status: {workOrderEvent.RestoredStatus}");
+                    Console.WriteLine($"Occurred At: {workOrderEvent.OccurredAt}");
+                    break;
+                }
+
             default:
                 Console.WriteLine($"Unsupported work-order event type: {envelope.EventType}");
                 break;

@@ -8,7 +8,6 @@
 
   <ItemGroup>
     <Folder Include="Identity\" />
-    <Folder Include="Kafka\Configuration\" />
     <Folder Include="Kafka\Producers\" />
     <Folder Include="Persistence\Migrations\" />
     <Folder Include="Seed\" />

@@ -20,7 +20,6 @@ public class WorkOrderNotificationConsumer : BackgroundService
             EnableAutoCommit = false
         };
     }
-
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         using var consumer = new ConsumerBuilder<string, string>(_config)
@@ -85,7 +84,6 @@ public class WorkOrderNotificationConsumer : BackgroundService
 
         await Task.CompletedTask;
     }
-
     private async Task ProcessEventAsync(KafkaEventEnvelope envelope, CancellationToken cancellationToken)
     {
         switch (envelope.EventType)
@@ -99,12 +97,17 @@ public class WorkOrderNotificationConsumer : BackgroundService
             case nameof(WorkOrderConcludedEvent): await ProcessWorkOrderConcludedAsync(envelope, cancellationToken);
                 break;
 
+            case nameof(WorkOrderOnHoldEvent): await ProcessWorkOrderOnHoldAsync(envelope, cancellationToken);
+                break;
+
+            case nameof(WorkOrderResumedEvent): await ProcessWorkOrderResumedAsync(envelope, cancellationToken);
+                break;
+
             default:
                 _logger.LogDebug("Skipping unsupported event type {EventType}.", envelope.EventType);
                 break;
         }      
     }
-
     private async Task ProcessTechnicianAssignedAsync(KafkaEventEnvelope envelope, CancellationToken cancellationToken)
     {
         var assignedEvent = envelope.Payload.Deserialize<TechnicianAssignedToWorkOrderEvent>();
@@ -147,7 +150,156 @@ public class WorkOrderNotificationConsumer : BackgroundService
 
         _logger.LogInformation("Sent assignment notification to technician {TechnicianId} for work order {WorkOrderId}.", technician.Id, assignedEvent.WorkOrderId);
     }
+    private async Task ProcessWorkOrderConcludedAsync(KafkaEventEnvelope envelope, CancellationToken cancellationToken)
+    {
+        var concludedEvent = envelope.Payload.Deserialize<WorkOrderConcludedEvent>();
+        if (concludedEvent is null)
+        {
+            _logger.LogWarning("Could not deserialize work order conclusion event.");
+            return;
+        }
 
+        using var scope = _scopeFactory.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<IAircraftMaintenanceDbContext>();
+        var supervisors = await dbContext.Users.Where(user => user.Role == Role.MaintenanceSupervisor && user.Status == EmploymentStatus.Active).ToListAsync(cancellationToken);
+        if (supervisors.Count == 0)
+        {
+            _logger.LogWarning("No active maintenance supervisors found for work order {WorkOrderId}.", concludedEvent.WorkOrderId);
+            return;
+        }
+
+        var workOrder = await dbContext.WorkOrders.FindAsync([concludedEvent.WorkOrderId], cancellationToken);
+        if (workOrder is null)
+        {
+            _logger.LogWarning("Work order {WorkOrderId} was not found for conclusion notification.", concludedEvent.WorkOrderId);
+            return;
+        }
+
+
+        foreach (var supervisor in supervisors)
+        {
+            if (string.IsNullOrWhiteSpace(supervisor.Email))
+            {
+                _logger.LogWarning("Maintenance Supervisor {SupervisorId} has no email address.", supervisor.Id);
+                continue;
+            }
+            var email = new EmailMessage(
+                supervisor.Email,
+                $"Work order {workOrder.Id} requires inspection",
+                $"""
+                Hello {supervisor.FirstName},
+
+                Work order {workOrder.Id} has been concluded
+                and is awaiting inspection.
+
+                Labor notes: {concludedEvent.LaborNotes}
+
+                Please review it in the Airport Maintenance
+                Operations Platform.
+                """);
+
+            await _emailSender.SendAsync(email, cancellationToken);
+        }
+    }
+    private async Task ProcessWorkOrderOnHoldAsync(KafkaEventEnvelope envelope, CancellationToken cancellationToken)
+    {
+        var onHoldEvent = envelope.Payload.Deserialize<WorkOrderOnHoldEvent>();
+        if (onHoldEvent is null)
+        {
+            _logger.LogWarning("Could not deserialize work order on-hold event.");
+            return;
+        }
+
+        using var scope = _scopeFactory.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<IAircraftMaintenanceDbContext>();
+        var supervisors = await dbContext.Users.Where(user => user.Role == Role.MaintenanceSupervisor && user.Status == EmploymentStatus.Active).ToListAsync(cancellationToken);
+        if (supervisors.Count == 0)
+        {
+            _logger.LogWarning("No active maintenance supervisors found for work order {WorkOrderId}.", onHoldEvent.WorkOrderId);
+            return;
+        }
+
+        var actor = await dbContext.Users.FirstOrDefaultAsync(user => user.Id == onHoldEvent.OnHoldByUserId, cancellationToken);
+        if (actor is null)
+        {
+            _logger.LogWarning("Actor {ActorId} was not found for work order {WorkOrderId}.", onHoldEvent.OnHoldByUserId, onHoldEvent.WorkOrderId);
+            return;
+        }
+
+        var workOrder = await dbContext.WorkOrders.FindAsync([onHoldEvent.WorkOrderId], cancellationToken);
+        if (workOrder is null)
+        {
+            _logger.LogWarning("Work order {WorkOrderId} was not found for on-hold notification.", onHoldEvent.WorkOrderId);
+            return;
+        }
+
+
+        foreach (var supervisor in supervisors)
+        {
+            if (string.IsNullOrWhiteSpace(supervisor.Email))
+            {
+                _logger.LogWarning("Maintenance Supervisor {SupervisorId} has no email address.", supervisor.Id);
+                continue;
+            }
+
+            var email = new EmailMessage(
+                supervisor.Email,
+                $"Work order {workOrder.Id} has been placed on hold.",
+                $"""
+                Hello { supervisor.FirstName },
+                    Work order { workOrder.Id} has been placed on hold.
+                Placed on hold by: { actor.FirstName} { actor.LastName}
+                Hold reason: { onHoldEvent.HoldReason}
+                Hold notes: { onHoldEvent.HoldNotes}
+                Previous status: { onHoldEvent.PreviousStatus}
+
+                Please review it in the Airport Maintenance
+                Operations Platform.
+                """);
+
+            await _emailSender.SendAsync(email, cancellationToken);
+        }
+    }
+    private async Task ProcessWorkOrderResumedAsync(KafkaEventEnvelope envelope, CancellationToken cancellationToken)
+    {
+        var resumedEvent = envelope.Payload.Deserialize<WorkOrderResumedEvent>();
+        if (resumedEvent is null)
+        {
+            _logger.LogWarning("Could not deserialize work order resumed event.");
+            return;
+        }
+
+        using var scope = _scopeFactory.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<IAircraftMaintenanceDbContext>();
+
+        var workOrder = await dbContext.WorkOrders.FindAsync([resumedEvent.WorkOrderId], cancellationToken);
+        if (workOrder is null)
+        {
+            _logger.LogWarning("Work order {WorkOrderId} was not found for resumed notification.", resumedEvent.WorkOrderId);
+            return;
+        }
+
+        var technician = await dbContext.Technicians.FindAsync([workOrder.AssignedTechnicianId], cancellationToken);
+        if (technician is null)
+        {
+            _logger.LogWarning("Assigned technician {TechnicianId} was not found for work order {WorkOrderId}.", workOrder.AssignedTechnicianId, workOrder.Id);
+            return;
+        }
+        if (string.IsNullOrWhiteSpace(technician.Email))
+        {
+            _logger.LogWarning("Assigned technician {TechnicianId} has no email address.", technician.Id);
+            return;
+        }
+
+        var emailToTechnician = new EmailMessage(
+            technician.Email,
+            $"Work order {workOrder.Id} has been resumed.",
+            $"""
+            Hello {technician.FirstName},
+                Work order {workOrder.Id} has been resumed. Please review it in the Airport Maintenance Operations Platform.
+            """);
+        await _emailSender.SendAsync(emailToTechnician, cancellationToken);
+    }
     private async Task ProcessWorkOrderCompletedAsync(KafkaEventEnvelope envelope, CancellationToken cancellationToken)
     {
         var completedEvent = envelope.Payload.Deserialize<WorkOrderCompletedEvent>();
@@ -165,12 +317,6 @@ public class WorkOrderNotificationConsumer : BackgroundService
         if (workOrder is null)
         {
             _logger.LogWarning("Work order {WorkOrderId} was not found for completion notification.", completedEvent.WorkOrderId);
-            return;
-        }
-
-        if (workOrder.AssignedByUserId is not Guid assignedByUserId)
-        {
-            _logger.LogWarning("Work order {WorkOrderId} has no recorded assigning user.", workOrder.Id);
             return;
         }
 
@@ -205,57 +351,4 @@ public class WorkOrderNotificationConsumer : BackgroundService
 
         _logger.LogInformation("Sent completion notification to technician {TechnicianId} for work order {WorkOrderId}.", technician.Id, workOrder.Id);
     }
-
-    private async Task ProcessWorkOrderConcludedAsync(KafkaEventEnvelope envelope, CancellationToken cancellationToken)
-    {
-        var concludedEvent = envelope.Payload.Deserialize<WorkOrderConcludedEvent>();
-        if (concludedEvent is null)
-        {
-            _logger.LogWarning("Could not deserialize work order conclusion event.");
-            return;
-        }
-
-        using var scope = _scopeFactory.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<IAircraftMaintenanceDbContext>();
-        var supervisors = await dbContext.Users.Where(user => user.Role == Role.MaintenanceSupervisor && user.Status == EmploymentStatus.Active).ToListAsync(cancellationToken);
-        if(supervisors.Count == 0)
-        {
-            _logger.LogWarning("No active maintenance supervisors found for work order {WorkOrderId}.", concludedEvent.WorkOrderId);
-            return;
-        }
-
-
-        var workOrder = await dbContext.WorkOrders.FindAsync([concludedEvent.WorkOrderId], cancellationToken);
-        if (workOrder is null)
-        {
-            _logger.LogWarning("Work order {WorkOrderId} was not found for conclusion notification.", concludedEvent.WorkOrderId);
-            return;
-        }
-        if (workOrder.AssignedByUserId is not Guid assignedByUserId)
-        {
-            _logger.LogWarning("Work order {WorkOrderId} has no recorded assigning user.", workOrder.Id);
-            return;
-        }
-
-        foreach (var supervisor in supervisors)
-        {
-            var email = new EmailMessage(
-                supervisor.Email,
-                $"Work order {workOrder.Id} requires inspection",
-                $"""
-                Hello {supervisor.FirstName},
-
-                Work order {workOrder.Id} has been concluded
-                and is awaiting inspection.
-
-                Labor notes: {concludedEvent.LaborNotes}
-
-                Please review it in the Airport Maintenance
-                Operations Platform.
-                """);
-
-            await _emailSender.SendAsync(email, cancellationToken);
-        }
-    }
-
 }

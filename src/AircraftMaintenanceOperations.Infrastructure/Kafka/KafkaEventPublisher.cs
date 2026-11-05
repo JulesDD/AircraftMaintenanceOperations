@@ -38,6 +38,8 @@ public class KafkaEventPublisher : IEventPublisher
             WorkOrderConcludedEvent => "work-order-events",
             WorkOrderCompletedEvent => "work-order-events",
             WorkOrderCreatedEvent => "work-order-events",
+            WorkOrderOnHoldEvent => "work-order-events",
+            WorkOrderResumedEvent => "work-order-events",
             TechnicianAssignedToWorkOrderEvent => "work-order-events",
             WorkOrderInProgressEvent => "work-order-events",
             WorkOrderSentToInspectionEvent => "work-order-events",
@@ -78,6 +80,12 @@ public class KafkaEventPublisher : IEventPublisher
 
             WorkOrderConcludedEvent workOrderConcludedEvent =>
                 workOrderConcludedEvent.WorkOrderId.ToString(),
+
+            WorkOrderOnHoldEvent workOrderOnHoldEvent =>
+                workOrderOnHoldEvent.WorkOrderId.ToString(),
+
+            WorkOrderResumedEvent workOrderResumedEvent =>
+                workOrderResumedEvent.WorkOrderId.ToString(),
 
             _ => throw new InvalidOperationException(
                 $"No Kafka key configured for event type {typeof(T).Name}.")
