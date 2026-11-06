@@ -1,6 +1,4 @@
-﻿
-
-namespace AircraftMaintenanceOperations.API.Endpoints.WorkOrder;
+﻿namespace AircraftMaintenanceOperations.API.Endpoints.WorkOrder;
 
 public class WorkOrderEndpoints : ICarterModule
 {
@@ -49,26 +47,14 @@ public class WorkOrderEndpoints : ICarterModule
         group.MapPatch("/{id:guid}", async (Guid id, UpdateWorkOrderCommand command , ISender sender) =>
         {
             var update = command with { WorkOrderId = id };
-        return Results.Ok(await sender.Send(update));
+            return Results.Ok(await sender.Send(update));
         })
             .WithName("UpdateWorkOrder")
-            .RequireAuthorization("Supervisor")
+            .RequireAuthorization("WorkOrderAccess")
             .Produces<UpdateWorkOrderResult>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .WithSummary("Updates an existing work order.")
             .WithDescription("Updates the details and estimated completion date of an existing work order.");
-
-        group.MapPatch("/{id:guid}/archive", async (Guid id, ISender sender) =>
-        {
-            var command = new ArchiveWorkOrderCommand(id, "");
-            var result = await sender.Send(command);
-            return Results.Ok(result);
-        })
-            .WithName("ArchiveWorkOrder")
-            .Produces<ArchiveWorkOrderResult>(StatusCodes.Status200OK)
-            .ProducesProblem(StatusCodes.Status400BadRequest)
-            .WithSummary("Archives an existing work order.")
-            .WithDescription("Archive Work Order");
 
         group.MapPatch("/{id:guid}/assign-technician", async (Guid id, AssignTechnicianCommand command, ISender sender) =>
         {
@@ -85,23 +71,51 @@ public class WorkOrderEndpoints : ICarterModule
 
         group.MapPatch("/{id:guid}/in-progress", async (Guid id, InProgressCommand command, ISender sender) =>
         { 
-            var update = command with { WorkOrderId = id };
-            var result = await sender.Send(update);
+            var inProgress = command with { WorkOrderId = id };
+            var result = await sender.Send(inProgress);
             return Results.Ok(result);
         })
             .WithName("WorkOrderInProgress")
+            .RequireAuthorization("Technician")
             .Produces<InProgressCommandResult>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .WithSummary("Updates a work order to in-progress status.")
             .WithDescription("Update Work Order to In Progress");
 
+        group.MapPatch("/{id:guid}/on-hold", async (Guid id, OnHoldWorkOrderCommand command, ISender sender) =>
+        {
+            var onHold = command with { WorkOrderId = id };
+            var result = await sender.Send(onHold);
+            return result.IsOnHold ? Results.Ok(result) : Results.BadRequest(result);
+        })
+            .WithName("OnHoldWorkOrder")
+            .RequireAuthorization("WorkOrderAccess")
+            .Produces<OnHoldWorkOrderResult>(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status400BadRequest)
+            .WithSummary("Updates a work order to on-hold status.")
+            .WithDescription("Update Work Order to On Hold");
+
+        group.MapPatch("/{id:guid}/resume", async (Guid id, ResumeWorkOrderCommand command, ISender sender) =>
+        {
+            var resume = command with { WorkOrderId = id };
+            var result = await sender.Send(resume);
+            return Results.Ok(result);
+        })
+            .WithName("ResumeWorkOrder")
+            .RequireAuthorization("WorkOrderAccess")
+            .Produces<ResumeWorkOrderResult>(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status400BadRequest)
+            .WithSummary("Updates a work order to resumed status.")
+            .WithDescription("Update Work Order to Resumed");
+
         group.MapPatch("/{id:guid}/concluded", async (Guid id, ConcludedWorkOrderCommand command, ISender sender) =>
         {
-            var update = command with { WorkOrderId = id };
-            var result = await sender.Send(update);
+            var concluded = command with { WorkOrderId = id };
+            var result = await sender.Send(concluded);
             return result.IsConcluded ? Results.Ok(result) : Results.BadRequest(result);
         })
             .WithName("ConcludeWorkOrder")
+            .RequireAuthorization("Technician")
             .Produces<ConcludedWorkOrderResult>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .WithSummary("Updates a work order to concluded status.")
@@ -109,12 +123,12 @@ public class WorkOrderEndpoints : ICarterModule
 
         group.MapPatch("/{id:guid}/inspection", async (Guid id, InspectionCommand command, ISender sender) =>
         {
-            var update = command with { WorkOrderId = id };
-            var result = await sender.Send(update);
-
+            var inspection = command with { WorkOrderId = id };
+            var result = await sender.Send(inspection);
             return Results.Ok(result);
         })
-            .WithName("InspectingWorkOrder")
+            .WithName("InspectWorkOrder")
+            .RequireAuthorization("Supervisor")
             .Produces<InspectionCommandResult>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .WithSummary("Work Order is sent to inspection status.")
@@ -122,15 +136,28 @@ public class WorkOrderEndpoints : ICarterModule
 
         group.MapPatch("/{id:guid}/complete", async (Guid id, CompletedWorkOrderCommand command, ISender sender) =>
         {
-        var update = command with { WorkOrderId = id };
-        var result = await sender.Send(update);
-
-        return Results.Ok(result);
+            var completed = command with { WorkOrderId = id };
+            var result = await sender.Send(completed);
+            return Results.Ok(result);
         })
             .WithName("CompleteWorkOrder")
+            .RequireAuthorization("Supervisor")
             .Produces<CompletedWorkOrderResult>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .WithSummary("Completes a work order.")
             .WithDescription("Completes an existing work order.");
+
+        group.MapPatch("/{id:guid}/archive", async (Guid id, ArchiveWorkOrderCommand command, ISender sender) =>
+        {
+            var archive = command with { WorkOrderId = id };
+            var result = await sender.Send(archive);
+            return result.IsArchived ? Results.Ok(result) : Results.BadRequest(result);
+        })
+           .WithName("ArchiveWorkOrder")
+           .RequireAuthorization("Supervisor")
+           .Produces<ArchiveWorkOrderResult>(StatusCodes.Status200OK)
+           .ProducesProblem(StatusCodes.Status400BadRequest)
+           .WithSummary("Archives an existing work order.")
+           .WithDescription("Archives a completed work order with final status notes.");
     }
 }

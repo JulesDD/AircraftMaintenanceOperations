@@ -6,10 +6,9 @@ public class InProgressCommandHandler(IAircraftMaintenanceDbContext DbContext, I
     {
         var domainUserId = await CurrentUser.GetDomainUserIdAsync(cancellationToken);
 
-        var isSupervisor = CurrentUser.Roles.Contains("Admin") || CurrentUser.Roles.Contains("MaintenanceSupervisor");
-        
-        var workOrder = await DbContext.WorkOrders.FindAsync(command.WorkOrderId);
-        if(workOrder is null) return new InProgressCommandResult(false);
+        var isSupervisor = CurrentUser.Roles.Any(role => string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase) || string.Equals(role, "MaintenanceSupervisor", StringComparison.OrdinalIgnoreCase));
+        var workOrder = await DbContext.WorkOrders.FindAsync([command.WorkOrderId], cancellationToken);
+        if (workOrder is null) return new InProgressCommandResult(false);
         if (!isSupervisor && workOrder.AssignedTechnicianId != domainUserId) throw new ForbiddenException("You are not authorized to start this work order.");
 
         var inProgress = workOrder.InProgress(command.LaborNotes);

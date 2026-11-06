@@ -25,8 +25,8 @@ public class OnHoldWorkOrderCommandHandler(IAircraftMaintenanceDbContext DbConte
             EventId = Guid.NewGuid(),
             WorkOrderId = workOrder.Id,
             OnHoldByUserId = user,
-            HoldNotes = command.HoldNotes,
-            HoldReason = command.HoldReason!,
+            HoldNotes = command.HoldNotes!,
+            HoldReason = workOrder.HoldReason!.Value,
             PreviousStatus = workOrder.PreviousStatus!.Value,
             OccurredAt = DateTimeOffset.UtcNow
         };

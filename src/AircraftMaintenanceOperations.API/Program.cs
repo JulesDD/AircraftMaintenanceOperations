@@ -1,6 +1,3 @@
-using AircraftMaintenanceOperations.API.Exceptions;
-using AircraftMaintenanceOperations.Application.Common.Interfaces;
-
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddInfrastructureServices(builder.Configuration);

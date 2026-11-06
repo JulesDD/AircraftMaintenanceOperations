@@ -42,6 +42,8 @@ global using AircraftMaintenanceOperations.Application.Features.WorkOrders.Comma
 global using AircraftMaintenanceOperations.Application.Features.WorkOrders.Command.CreateWorkOrderCommand;
 global using AircraftMaintenanceOperations.Application.Features.WorkOrders.Command.InProgressCommand;
 global using AircraftMaintenanceOperations.Application.Features.WorkOrders.Command.InspectionCommand;
+global using AircraftMaintenanceOperations.Application.Features.WorkOrders.Command.OnHoldWorkOrderCommand;
+global using AircraftMaintenanceOperations.Application.Features.WorkOrders.Command.ResumeWorkOrderCommand;
 global using AircraftMaintenanceOperations.Application.Features.WorkOrders.Command.UpdateWorkOrderCommand;
 global using AircraftMaintenanceOperations.Application.Features.WorkOrders.Queries.GetWorkOrderByIdQuery;
 global using AircraftMaintenanceOperations.Application.Features.WorkOrders.Queries.GetWorkOrderQuery;
@@ -59,3 +61,5 @@ global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.OpenApi.Models;
 global using System.ComponentModel.DataAnnotations;
 global using System.Reflection;
+global using AircraftMaintenanceOperations.API.Exceptions;
+global using AircraftMaintenanceOperations.Application.Common.Interfaces;
