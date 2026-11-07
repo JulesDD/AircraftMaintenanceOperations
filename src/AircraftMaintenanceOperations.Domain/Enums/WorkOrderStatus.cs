@@ -7,7 +7,9 @@ public enum WorkOrderStatus
     InProgress,
     Concluded,
     OnHold,
-    Inspection,
+    InspectionPending,
+    InspectionPassed,
+    InspectionFailed,
     Completed,
     Archived
 }

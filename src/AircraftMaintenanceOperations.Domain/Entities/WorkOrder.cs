@@ -105,7 +105,7 @@ public class WorkOrder : BaseEntity
         if (laborHours <= 0) return new(false, "Labor hours must be greater than zero.");
         if (WorkOrderStatus == WorkOrderStatus.Completed) return new(false, "Work orders that are already completed cannot be completed again.");
         if (WorkOrderStatus == WorkOrderStatus.Archived) return new(false, "Archived work orders cannot be completed.");
-        if (WorkOrderStatus != WorkOrderStatus.Inspection) return new(false, "Only work orders that have reached inspection can be completed.");
+        if (WorkOrderStatus != WorkOrderStatus.InspectionPassed) return new(false, "Only work orders that have passed inspection can be completed.");
 
         WorkOrderStatus = WorkOrderStatus.Completed;
         ActualCompletionDate = DateTime.UtcNow;
@@ -158,7 +158,7 @@ public class WorkOrder : BaseEntity
         if (string.IsNullOrWhiteSpace(laborNotes)) return new(false, "A status note is required.");
         if (WorkOrderStatus != WorkOrderStatus.Concluded) return new(false, "Only concluded work orders can be moved to inspection.");
         
-        WorkOrderStatus = WorkOrderStatus.Inspection;
+        WorkOrderStatus = WorkOrderStatus.InspectionPending;
         LaborNotes = laborNotes;
         return new(true);
     }
@@ -176,18 +176,29 @@ public class WorkOrder : BaseEntity
     public DomainResult InspectWorkOrderResult(bool isInspected, string inspectionNotes)
     {
         if (string.IsNullOrWhiteSpace(inspectionNotes)) return new(false, "Inspection notes are required.");
-        if (WorkOrderStatus != WorkOrderStatus.Inspection) return new(false, "Only work orders in inspection can be inspected.");
+        if (WorkOrderStatus != WorkOrderStatus.InspectionPending) return new(false, "Only work orders in inspection can be inspected.");
         if (isInspected)
         {
-            WorkOrderStatus = WorkOrderStatus.Inspection;
+            WorkOrderStatus = WorkOrderStatus.InspectionPassed;
             LaborNotes = inspectionNotes;
-            return new(true);
+            return new(true, "Inspection passed.");
         }
         else
         {
-            WorkOrderStatus = WorkOrderStatus.InProgress;
+            WorkOrderStatus = WorkOrderStatus.InspectionFailed;
             LaborNotes = inspectionNotes;
-            return new(true);
+            return new(true, "Inspection failed. Follow the inspection notes provided and guidelines.");
         }
+    }
+
+    public DomainResult StartRework(string reworkNotes)
+    {
+        if (string.IsNullOrWhiteSpace(reworkNotes)) return new(false, "Rework notes are required.");
+        if (WorkOrderStatus != WorkOrderStatus.InspectionFailed) return new(false, "Only work orders that failed inspection can be returned for rework.");
+
+        WorkOrderStatus = WorkOrderStatus.InProgress;
+        LaborNotes = reworkNotes.Trim();
+
+        return new(true);
     }
 }

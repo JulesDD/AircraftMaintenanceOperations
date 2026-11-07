@@ -5,15 +5,12 @@ public class InspectionCommandHandler(IAircraftMaintenanceDbContext DbContext, I
     public async Task<InspectionCommandResult> Handle(InspectionCommand command, CancellationToken cancellationToken)
     {
         var domainUserId = await CurrentUser.GetDomainUserIdAsync(cancellationToken);
-
         var isSupervisor = CurrentUser.Roles.Contains("MaintenanceSupervisor") || CurrentUser.Roles.Contains("Admin");
-        
-        
         var workOrder = await DbContext.WorkOrders.FindAsync(command.WorkOrderId);
         if(workOrder is null) return new InspectionCommandResult(false);
         if (!isSupervisor && workOrder.AssignedTechnicianId != domainUserId) throw new ForbiddenException("You are not authorized to work on this work order.");
 
-        var inspection = workOrder.Inspection(command.LaborNotes);
+        var inspection = workOrder.Inspection(command.InspectionNotes);
         if(!inspection.IsSuccess) return new InspectionCommandResult(false);
 
         await DbContext.SaveChangesAsync(cancellationToken);
