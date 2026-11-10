@@ -44,6 +44,7 @@ public class KafkaEventPublisher : IEventPublisher
             WorkOrderSentToInspectionEvent => "work-order-events",
             WorkOrderInspectionPassedEvent => "work-order-events",
             WorkOrderInspectionFailedEvent => "work-order-events",
+            WorkOrderReworkStartedEvent => "work-order-events",
             TechnicianAssignedToWorkOrderEvent => "work-order-events",
             InventoryIssuedForWorkOrderEvent => "inventory-events",
             InventoryAdjustedEvent => "inventory-events",
@@ -85,6 +86,9 @@ public class KafkaEventPublisher : IEventPublisher
 
             WorkOrderInspectionFailedEvent workOrderInspectionFailedEvent =>
                 workOrderInspectionFailedEvent.WorkOrderId.ToString(),
+
+            WorkOrderReworkStartedEvent reworkWorkOrderEvent =>
+                reworkWorkOrderEvent.WorkOrderId.ToString(),
 
             InventoryIssuedForWorkOrderEvent inventoryIssuedEvent =>
                 inventoryIssuedEvent.WorkOrderId.ToString(),

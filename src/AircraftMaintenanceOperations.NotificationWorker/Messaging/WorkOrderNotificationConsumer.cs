@@ -103,6 +103,12 @@ public class WorkOrderNotificationConsumer : BackgroundService
             case nameof(WorkOrderResumedEvent): await ProcessWorkOrderResumedAsync(envelope, cancellationToken);
                 break;
 
+            case nameof(WorkOrderInspectionPassedEvent): await ProcessWorkOrderInspectionPassedAsync(envelope, cancellationToken);
+                break;
+
+            case nameof(WorkOrderInspectionFailedEvent): await ProcessWorkOrderInspectionFailedAsync(envelope, cancellationToken);
+                break;
+
             default:
                 _logger.LogDebug("Skipping unsupported event type {EventType}.", envelope.EventType);
                 break;
@@ -259,6 +265,87 @@ public class WorkOrderNotificationConsumer : BackgroundService
 
             await _emailSender.SendAsync(email, cancellationToken);
         }
+    }
+    private async Task ProcessWorkOrderInspectionPassedAsync(KafkaEventEnvelope envelope, CancellationToken cancellationToken)
+    {
+        var inspectionPassedEvent = envelope.Payload.Deserialize<WorkOrderInspectionPassedEvent>();
+        if (inspectionPassedEvent is null)
+        {
+            _logger.LogWarning("Could not deserialize work order inspection passed event.");
+            return;
+        }
+        using var scope = _scopeFactory.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<IAircraftMaintenanceDbContext>();
+        var workOrder = await dbContext.WorkOrders.FindAsync([inspectionPassedEvent.WorkOrderId], cancellationToken);
+        if (workOrder is null)
+        {
+            _logger.LogWarning("Work order {WorkOrderId} was not found for inspection passed notification.", inspectionPassedEvent.WorkOrderId);
+            return;
+        }
+        var technician = await dbContext.Technicians.FindAsync([workOrder.AssignedTechnicianId], cancellationToken);
+        if (technician is null)
+        {
+            _logger.LogWarning("Assigned technician {TechnicianId} was not found for work order {WorkOrderId}.", workOrder.AssignedTechnicianId, workOrder.Id);
+            return;
+        }
+        if (string.IsNullOrWhiteSpace(technician.Email))
+        {
+            _logger.LogWarning("Assigned technician {TechnicianId} has no email address.", technician.Id);
+            return;
+        }
+        var emailToTechnician = new EmailMessage(
+            technician.Email,
+            $"Work order {workOrder.Id} has passed inspection.",
+            $"""
+            Hello {technician.FirstName},
+                Work order {workOrder.Id} has passed inspection. Please review it in the Airport Maintenance Operations Platform.
+            """);
+        await _emailSender.SendAsync(emailToTechnician, cancellationToken);
+    }
+    private async Task ProcessWorkOrderInspectionFailedAsync(KafkaEventEnvelope envelope, CancellationToken cancellationToken)
+    {
+        var inspectionFailedEvent = envelope.Payload.Deserialize<WorkOrderInspectionFailedEvent>();
+        if (inspectionFailedEvent is null)
+        {
+            _logger.LogWarning("Could not deserialize work order inspection failed event.");
+            return;
+        }
+        using var scope = _scopeFactory.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<IAircraftMaintenanceDbContext>();
+        var workOrder = await dbContext.WorkOrders.FindAsync([inspectionFailedEvent.WorkOrderId], cancellationToken);
+        if (workOrder is null)
+        {
+            _logger.LogWarning("Work order {WorkOrderId} was not found for inspection failed notification.", inspectionFailedEvent.WorkOrderId);
+            return;
+        }
+        var technician = await dbContext.Technicians.FindAsync([workOrder.AssignedTechnicianId], cancellationToken);
+        if (technician is null)
+        {
+            _logger.LogWarning("Assigned technician {TechnicianId} was not found for work order {WorkOrderId}.", workOrder.AssignedTechnicianId, workOrder.Id);
+            return;
+        }
+        if (string.IsNullOrWhiteSpace(technician.Email))
+        {
+            _logger.LogWarning("Assigned technician {TechnicianId} has no email address.", technician.Id);
+            return;
+        }
+        var emailToTechnician = new EmailMessage(
+            technician.Email,
+            $"Work order {workOrder.Id} has failed inspection.",
+            $"""
+            Hello {technician.FirstName},
+
+            Work order {workOrder.Id} has failed inspection.
+
+            Supervisor inspection notes:
+            {inspectionFailedEvent.InspectionNotes}
+
+            Please review the work order and inspection notes in the
+            Airport Maintenance Operations Platform.
+
+            Follow the corrective instructions before starting rework.
+            """);
+        await _emailSender.SendAsync(emailToTechnician, cancellationToken);
     }
     private async Task ProcessWorkOrderResumedAsync(KafkaEventEnvelope envelope, CancellationToken cancellationToken)
     {

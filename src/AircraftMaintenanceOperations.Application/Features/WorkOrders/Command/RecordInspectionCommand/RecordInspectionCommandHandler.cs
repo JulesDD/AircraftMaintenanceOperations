@@ -10,7 +10,13 @@ public class RecordInspectionCommandHandler(IAircraftMaintenanceDbContext DbCont
         var workOrder = await DbContext.WorkOrders.FindAsync(request.WorkOrderId, cancellationToken);
         if (workOrder is null) return new RecordInspectionCommandResult(false, "Work order not found." );
 
-        if (!CurrentUser.Roles.Contains("Supervisor")) throw new ForbiddenException("You are not authorized to record inspection for this work order.");
+        var isSupervisor = CurrentUser.Roles.Any(role => role.Equals("Admin", StringComparison.OrdinalIgnoreCase) || role.Equals("MaintenanceSupervisor", StringComparison.OrdinalIgnoreCase));
+
+        if (!isSupervisor)
+        {
+            throw new ForbiddenException(
+                "You are not authorized to record inspection for this work order.");
+        }
 
         var inspectionResult = workOrder.InspectWorkOrderResult(request.IsInspected, request.InspectionNotes);
         if (!inspectionResult.IsSuccess)
