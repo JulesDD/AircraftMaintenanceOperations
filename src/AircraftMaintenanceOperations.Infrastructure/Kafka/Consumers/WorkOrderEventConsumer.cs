@@ -225,6 +225,56 @@ public class WorkOrderEventConsumer
                     break;
                 }
 
+            case nameof(WorkOrderInspectionPassedEvent):
+                {
+                    var workOrderEvent = envelope.Payload.Deserialize<WorkOrderInspectionPassedEvent>();
+                    if (workOrderEvent is null)
+                    {
+                        Console.Error.WriteLine("Failed to deserialize WorkOrderInspectionPassedEvent.");
+                        return;
+                    }
+                    Console.WriteLine("WorkOrderInspectionPassedEvent processed.");
+                    Console.WriteLine($"Work Order ID: {workOrderEvent.WorkOrderId}");
+                    Console.WriteLine($"Inspected By: {workOrderEvent.InspectedByUserId}");
+                    Console.WriteLine($"Inspection Notes: {workOrderEvent.InspectionNotes}");
+                    Console.WriteLine($"Occurred At: {workOrderEvent.OccurredAt}");
+                    break;
+                }
+
+            case nameof(WorkOrderInspectionFailedEvent):
+                {
+                    var workOrderEvent = envelope.Payload.Deserialize<WorkOrderInspectionFailedEvent>();
+                    if (workOrderEvent is null)
+                    {
+                        Console.Error.WriteLine("Failed to deserialize WorkOrderInspectionFailedEvent.");
+                        return;
+                    }
+                    Console.WriteLine("WorkOrderInspectionFailedEvent processed.");
+                    Console.WriteLine($"Work Order ID: {workOrderEvent.WorkOrderId}");
+                    Console.WriteLine($"Inspected By: {workOrderEvent.InspectedByUserId}");
+                    Console.WriteLine($"Inspection Notes: {workOrderEvent.InspectionNotes}");
+                    Console.WriteLine($"Occurred At: {workOrderEvent.OccurredAt}");
+                    break;
+                }
+
+            case nameof(WorkOrderReworkStartedEvent):
+                {
+                    var workOrderEvent = envelope.Payload.Deserialize<WorkOrderReworkStartedEvent>();
+
+                    if (workOrderEvent is null)
+                    {
+                        Console.Error.WriteLine("Failed to deserialize WorkOrderReworkStartedEvent.");
+                        return;
+                    }
+
+                    Console.WriteLine("WorkOrderReworkStartedEvent processed.");
+                    Console.WriteLine($"Work Order ID: {workOrderEvent.WorkOrderId}");
+                    Console.WriteLine($"Reworked By: {workOrderEvent.ReworkedByUserId}");
+                    Console.WriteLine($"Rework Notes: {workOrderEvent.ReworkNotes}");
+                    Console.WriteLine($"Occurred At: {workOrderEvent.OccurredAt}");
+                    break;
+                }
+
             default:
                 Console.WriteLine($"Unsupported work-order event type: {envelope.EventType}");
                 break;

@@ -7,6 +7,7 @@ builder.Services.AddAuthorization(opt =>
     opt.AddPolicy("Supervisor", policy => policy.RequireRole("Admin", "MaintenanceSupervisor"));
     opt.AddPolicy("Technician", policy => policy.RequireRole("Technician"));
     opt.AddPolicy("WorkOrderAccess", policy => policy.RequireRole("Admin", "MaintenanceSupervisor", "Technician"));
+    opt.AddPolicy("WorkOrderHoldResume", policy => policy.RequireRole("MaintenanceSupervisor", "Technician"));
     opt.AddPolicy("InventoryManagement", policy => policy.RequireRole("Admin", "InventoryClerk", "OperationsManager", "MaintenanceSupervisor"));
     opt.AddPolicy("MaintenanceRequestAccess", policy => policy.RequireRole("Admin", "MaintenanceSupervisor", "Pilot"));
     opt.AddPolicy("MaintenanceHistoryAccess", policy => policy.RequireRole("Admin", "MaintenanceSupervisor", "Technician"));

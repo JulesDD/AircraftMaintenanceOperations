@@ -1,4 +1,7 @@
-﻿namespace AircraftMaintenanceOperations.API.Endpoints.WorkOrder;
+﻿using AircraftMaintenanceOperations.Application.Features.WorkOrders.Command.RecordInspectionCommand;
+using AircraftMaintenanceOperations.Application.Features.WorkOrders.Command.ReworkWorkOrderCommand;
+
+namespace AircraftMaintenanceOperations.API.Endpoints.WorkOrder;
 
 public class WorkOrderEndpoints : ICarterModule
 {
@@ -89,7 +92,7 @@ public class WorkOrderEndpoints : ICarterModule
             return result.IsOnHold ? Results.Ok(result) : Results.BadRequest(result);
         })
             .WithName("OnHoldWorkOrder")
-            .RequireAuthorization("WorkOrderAccess")
+            .RequireAuthorization("WorkOrderHoldResume")
             .Produces<OnHoldWorkOrderResult>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .WithSummary("Updates a work order to on-hold status.")
@@ -99,10 +102,10 @@ public class WorkOrderEndpoints : ICarterModule
         {
             var resume = command with { WorkOrderId = id };
             var result = await sender.Send(resume);
-            return Results.Ok(result);
+            return result.IsResumed ? Results.Ok(result) : Results.BadRequest(result);
         })
             .WithName("ResumeWorkOrder")
-            .RequireAuthorization("WorkOrderAccess")
+            .RequireAuthorization("WorkOrderHoldResume")
             .Produces<ResumeWorkOrderResult>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .WithSummary("Updates a work order to resumed status.")
@@ -133,6 +136,31 @@ public class WorkOrderEndpoints : ICarterModule
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .WithSummary("Work Order is sent to inspection status.")
             .WithDescription("Work Order is sent to Supervisor for inspection.");
+
+        group.MapPatch("/{id:guid}/inspection-result", async (Guid id, RecordInspectionCommand command, ISender sender) =>
+        {
+            var inspectionResult = command with { WorkOrderId = id };
+            var result = await sender.Send(inspectionResult);
+            return result.IsRecorded ? Results.Ok(result) : Results.BadRequest(result);
+        })
+            .WithName("InspectionResultWorkOrder")
+            .RequireAuthorization("Supervisor")
+            .Produces<RecordInspectionCommandResult>(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status400BadRequest)
+            .WithSummary("Updates a work order with the inspection result.")
+            .WithDescription("Updates a work order with the inspection result provided by the supervisor.");
+
+        group.MapPatch("/{id:guid}/rework", async (Guid id, StartReworkWorkOrderCommand command, ISender sender) =>
+        {
+            var rework = command with { WorkOrderId = id };
+            var result = await sender.Send(rework);
+            return result.IsReworkStarted ? Results.Ok(result) : Results.BadRequest(result);
+        })
+            .WithName("StartReworkWorkOrder")
+            .RequireAuthorization("Technician")
+            .Produces<StartReworkWorkOrderCommandResult>(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status400BadRequest)
+            .WithSummary("Starts rework on a work order that failed inspection.");
 
         group.MapPatch("/{id:guid}/complete", async (Guid id, CompletedWorkOrderCommand command, ISender sender) =>
         {

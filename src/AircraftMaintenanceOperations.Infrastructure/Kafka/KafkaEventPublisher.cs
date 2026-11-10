@@ -40,9 +40,11 @@ public class KafkaEventPublisher : IEventPublisher
             WorkOrderCreatedEvent => "work-order-events",
             WorkOrderOnHoldEvent => "work-order-events",
             WorkOrderResumedEvent => "work-order-events",
-            TechnicianAssignedToWorkOrderEvent => "work-order-events",
             WorkOrderInProgressEvent => "work-order-events",
             WorkOrderSentToInspectionEvent => "work-order-events",
+            WorkOrderInspectionPassedEvent => "work-order-events",
+            WorkOrderInspectionFailedEvent => "work-order-events",
+            TechnicianAssignedToWorkOrderEvent => "work-order-events",
             InventoryIssuedForWorkOrderEvent => "inventory-events",
             InventoryAdjustedEvent => "inventory-events",
             InventoryReceivedEvent => "inventory-events",
@@ -69,6 +71,21 @@ public class KafkaEventPublisher : IEventPublisher
             WorkOrderSentToInspectionEvent workOrderSentToInspectionEvent =>
                 workOrderSentToInspectionEvent.WorkOrderId.ToString(),
 
+            WorkOrderConcludedEvent workOrderConcludedEvent =>
+                workOrderConcludedEvent.WorkOrderId.ToString(),
+
+            WorkOrderOnHoldEvent workOrderOnHoldEvent =>
+                workOrderOnHoldEvent.WorkOrderId.ToString(),
+
+            WorkOrderResumedEvent workOrderResumedEvent =>
+                workOrderResumedEvent.WorkOrderId.ToString(),
+
+            WorkOrderInspectionPassedEvent workOrderInspectionPassedEvent =>
+                workOrderInspectionPassedEvent.WorkOrderId.ToString(),
+
+            WorkOrderInspectionFailedEvent workOrderInspectionFailedEvent =>
+                workOrderInspectionFailedEvent.WorkOrderId.ToString(),
+
             InventoryIssuedForWorkOrderEvent inventoryIssuedEvent =>
                 inventoryIssuedEvent.WorkOrderId.ToString(),
 
@@ -78,14 +95,7 @@ public class KafkaEventPublisher : IEventPublisher
             InventoryReceivedEvent inventoryReceivedEvent =>
                 inventoryReceivedEvent.InventoryPartId.ToString(),
 
-            WorkOrderConcludedEvent workOrderConcludedEvent =>
-                workOrderConcludedEvent.WorkOrderId.ToString(),
 
-            WorkOrderOnHoldEvent workOrderOnHoldEvent =>
-                workOrderOnHoldEvent.WorkOrderId.ToString(),
-
-            WorkOrderResumedEvent workOrderResumedEvent =>
-                workOrderResumedEvent.WorkOrderId.ToString(),
 
             _ => throw new InvalidOperationException(
                 $"No Kafka key configured for event type {typeof(T).Name}.")

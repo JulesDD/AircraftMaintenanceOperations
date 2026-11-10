@@ -180,13 +180,13 @@ public class WorkOrder : BaseEntity
         if (isInspected)
         {
             WorkOrderStatus = WorkOrderStatus.InspectionPassed;
-            LaborNotes = inspectionNotes;
+            LaborNotes = inspectionNotes.Trim();
             return new(true, "Inspection passed.");
         }
         else
         {
             WorkOrderStatus = WorkOrderStatus.InspectionFailed;
-            LaborNotes = inspectionNotes;
+            LaborNotes = inspectionNotes.Trim();
             return new(true, "Inspection failed. Follow the inspection notes provided and guidelines.");
         }
     }

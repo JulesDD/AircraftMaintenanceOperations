@@ -14,7 +14,7 @@ public record GetMaintenanceTaskQueryHandler(IAircraftMaintenanceDbContext DbCon
         wo.WorkOrderStatus == WorkOrderStatus.Open
         || wo.WorkOrderStatus == WorkOrderStatus.Assigned
         || wo.WorkOrderStatus == WorkOrderStatus.InProgress
-        || wo.WorkOrderStatus == WorkOrderStatus.Inspection).OrderBy(wo => wo.Id).AsNoTracking();
+        || wo.WorkOrderStatus == WorkOrderStatus.InspectionPending).OrderBy(wo => wo.Id).AsNoTracking();
 
         //map sources
         var requestTasks = await mRequest.Select(r => new MaintenanceTaskDto(
