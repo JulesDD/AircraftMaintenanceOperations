@@ -74,8 +74,16 @@ public class CompletedWorkOrderCommandHanderTests
         var inProgressResult = workOrder.InProgress("Maintenance work started");
         Assert.IsTrue(inProgressResult.IsSuccess);
 
+        var concludeResult = workOrder.Concluded("Maintenance work completed.");
+        Assert.IsTrue(concludeResult.IsSuccess, concludeResult.ErrorMessage);
+
         var inspectionResult = workOrder.Inspection("Inspection completed");
-        Assert.IsTrue(inspectionResult.IsSuccess);
+        Assert.IsTrue(inspectionResult.IsSuccess, inspectionResult.ErrorMessage);
+
+        // Record successful inspection
+        var inspectionPassedResult = workOrder.InspectWorkOrderResult(true, "Inspection passed successfully.");
+        Assert.IsTrue(inspectionPassedResult.IsSuccess, inspectionPassedResult.ErrorMessage);
+        Assert.AreEqual(WorkOrderStatus.InspectionPassed, workOrder.WorkOrderStatus);
 
         dbContext.WorkOrders.Add(workOrder);
 
@@ -168,6 +176,9 @@ public class CompletedWorkOrderCommandHanderTests
         var inProgressResult = workOrder.InProgress("Maintenance work started");
         Assert.IsTrue(inProgressResult.IsSuccess);
 
+        var concludeResult = workOrder.Concluded("Maintenance work completed.");
+        Assert.IsTrue(concludeResult.IsSuccess, concludeResult.ErrorMessage);
+
         var inspectionResult = workOrder.Inspection("Inspection completed");
         Assert.IsTrue(inspectionResult.IsSuccess);
 
@@ -223,11 +234,13 @@ public class CompletedWorkOrderCommandHanderTests
         var assignResult = workOrder.AssignTechnician(technician, "Technician assigned", assignedByUserId);
 
         Assert.IsTrue(assignResult.IsSuccess);
-
         var inProgressResult = workOrder.InProgress("Maintenance work started");
         Assert.IsTrue(inProgressResult.IsSuccess);
 
-        var inspectionResult = workOrder.Inspection("Inspection completed");
+        var concludedResult = workOrder.Concluded("Maintenance work completed");
+        Assert.IsTrue(concludedResult.IsSuccess);
+
+        var inspectionResult = workOrder.Inspection("Inspection started");
         Assert.IsTrue(inspectionResult.IsSuccess);
 
         dbContext.WorkOrders.Add(workOrder);
@@ -307,7 +320,7 @@ public class CompletedWorkOrderCommandHanderTests
         // Assert
         Assert.IsFalse(result.IsSuccess);
         Assert.AreEqual(0, eventPublisher.PublishedEvents.Count);
-        Assert.AreEqual("Only work orders in inspection can be completed.", result.ErrorMessage);
+        Assert.AreEqual("Only work orders that have passed inspection can be completed.", result.ErrorMessage);
     }
 
     [TestMethod]
@@ -342,8 +355,16 @@ public class CompletedWorkOrderCommandHanderTests
         var inProgressResult = workOrder.InProgress("Maintenance work started");
         Assert.IsTrue(inProgressResult.IsSuccess);
 
+        var concludeResult = workOrder.Concluded("Maintenance work completed.");
+        Assert.IsTrue(concludeResult.IsSuccess, concludeResult.ErrorMessage);
+
         var inspectionResult = workOrder.Inspection("Inspection completed");
         Assert.IsTrue(inspectionResult.IsSuccess);
+
+
+        var inspectionPassedResult = workOrder.InspectWorkOrderResult(true, "Inspection passed successfully.");
+        Assert.IsTrue(inspectionPassedResult.IsSuccess, inspectionPassedResult.ErrorMessage);
+        Assert.AreEqual(WorkOrderStatus.InspectionPassed, workOrder.WorkOrderStatus);
 
         dbContext.WorkOrders.Add(workOrder);
 

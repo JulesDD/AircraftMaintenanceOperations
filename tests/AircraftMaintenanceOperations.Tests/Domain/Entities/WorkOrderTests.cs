@@ -180,6 +180,9 @@ public class WorkOrderTests
         var inspectionResult = workOrder.Inspection("Moving to inspection.");
         Assert.IsTrue(inspectionResult.IsSuccess, inspectionResult.ErrorMessage);
 
+        var inspectionPassedResult = workOrder.InspectWorkOrderResult(true, "Inspection passed successfully.");
+        Assert.IsTrue(inspectionPassedResult.IsSuccess, inspectionPassedResult.ErrorMessage);
+
         var completeResult = workOrder.Completed("Completing work order.", 6.5m);
         Assert.IsTrue(completeResult.IsSuccess, completeResult.ErrorMessage);
         Assert.AreEqual(WorkOrderStatus.Completed, workOrder.WorkOrderStatus);
@@ -201,6 +204,7 @@ public class WorkOrderTests
             MaintenancePriority.Medium,
             DateTime.UtcNow.AddDays(7),
             "Initial work order notes.");
+
         var technician = Technician.Create(
             "EMP654",
             "Charlie",
@@ -210,7 +214,8 @@ public class WorkOrderTests
             CertificationLevel.Senior,
             7);
 
-        var assignmentResult = workOrder.AssignTechnician(technician, "Assigning technician.", Guid.NewGuid());
+        var assignmentResult = workOrder.AssignTechnician(
+            technician, "Assigning technician.", Guid.NewGuid());
         Assert.IsTrue(assignmentResult.IsSuccess, assignmentResult.ErrorMessage);
 
         var startResult = workOrder.InProgress("Starting work order.");
@@ -222,16 +227,37 @@ public class WorkOrderTests
         var inspectionResult = workOrder.Inspection("Moving to inspection.");
         Assert.IsTrue(inspectionResult.IsSuccess, inspectionResult.ErrorMessage);
 
-        var completeResult = workOrder.Completed("Completing work order.", 6.5m);
+        // Record successful inspection
+        var inspectionPassedResult = workOrder.InspectWorkOrderResult(
+            true,
+            "Inspection passed successfully.");
+
+        Assert.IsTrue(
+            inspectionPassedResult.IsSuccess,
+            inspectionPassedResult.ErrorMessage);
+
+        // Complete work order
+        var completeResult = workOrder.Completed(
+            "Completing work order.", 6.5m);
+
         Assert.IsTrue(completeResult.IsSuccess, completeResult.ErrorMessage);
 
+        // Archive work order
         var archiveResult = workOrder.ArchiveWorkOrder("Archiving work order.");
         Assert.IsTrue(archiveResult.IsSuccess, archiveResult.ErrorMessage);
 
-        var holdResult = workOrder.OnHold(HoldReason.Clarification, "Waiting for clarification.");
+        // Attempt to put archived work order on hold
+        var holdResult = workOrder.OnHold(
+            HoldReason.Clarification,
+            "Waiting for clarification.");
+
         Assert.IsFalse(holdResult.IsSuccess);
-        Assert.AreEqual("Only assigned or in-progress work orders can be put on hold.", holdResult.ErrorMessage);
+
+        Assert.AreEqual(
+            "Only assigned or in-progress work orders can be put on hold.",
+            holdResult.ErrorMessage);
     }
+
 
     [TestMethod]
     public void OnHold_WhenReasonIsNull_ReturnsError()

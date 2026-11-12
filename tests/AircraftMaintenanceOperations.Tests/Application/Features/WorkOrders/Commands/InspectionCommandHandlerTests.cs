@@ -74,6 +74,10 @@ public class InspectionCommandHandlerTests
         Assert.IsTrue(startResult.IsSuccess, startResult.ErrorMessage);
         Assert.AreEqual(WorkOrderStatus.InProgress, workOrder.WorkOrderStatus);
 
+        var concludeResult = workOrder.Concluded("Maintenance work completed.");
+        Assert.IsTrue(concludeResult.IsSuccess, concludeResult.ErrorMessage);
+        Assert.AreEqual(WorkOrderStatus.Concluded, workOrder.WorkOrderStatus);
+
         dbContext.WorkOrders.Add(workOrder);
         await dbContext.SaveChangesAsync();
 
