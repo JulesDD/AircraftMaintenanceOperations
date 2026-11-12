@@ -62,8 +62,11 @@ using (var scope = app.Services.CreateScope())
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
     var dbContext = scope.ServiceProvider.GetRequiredService<AircraftMaintenanceDbContext>();
 
-    await IdentitySeeder.SeedRolesAsync(roleManager);
-    await IdentitySeeder.SeedUserAsync(userManager, dbContext);
+    if (app.Environment.IsDevelopment())
+    {
+        await IdentitySeeder.SeedRolesAsync(roleManager);
+        await IdentitySeeder.SeedUserAsync(userManager, dbContext, app.Configuration);
+    }
 }
 
 // Configure the HTTP request pipeline.

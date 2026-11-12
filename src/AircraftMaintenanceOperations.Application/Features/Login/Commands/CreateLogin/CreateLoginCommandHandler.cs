@@ -5,7 +5,7 @@ public class CreateLoginCommandHandler(IAuthenticationService authenticationServ
     public async Task<CreateLoginCommandResult> Handle(CreateLoginCommand command, CancellationToken cancellationToken)
     {
         var authenticationResult = await authenticationService.AuthenticateAsync(command.UserName, command.Password);
-        if (authenticationResult is null) throw new Exception("Invalid username or password");
+        if (authenticationResult is null) throw new UnauthorizedAccessException("Invalid username or password");
 
         var accessToken = jwtTokenService.GenerateToken(
             authenticationResult.UserId,

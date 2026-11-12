@@ -114,8 +114,25 @@ public static class IdentitySeeder
         }
     }
 
-    public static async Task SeedUserAsync(UserManager<ApplicationUser> userManager, AircraftMaintenanceDbContext dbContext)
+    public static async Task SeedUserAsync(
+        UserManager<ApplicationUser> userManager,
+        AircraftMaintenanceDbContext dbContext,
+        IConfiguration configuration)
     {
+        if (!configuration.GetValue<bool>("DevelopmentSeedUsers:Enabled"))
+            return;
+
+        string RequiredPassword(string accountName)
+        {
+            var password = configuration[$"DevelopmentSeedUsers:{accountName}Password"];
+            if (string.IsNullOrWhiteSpace(password))
+            {
+                throw new InvalidOperationException(
+                    $"Development seed password 'DevelopmentSeedUsers:{accountName}Password' is required when development user seeding is enabled. Configure it with .NET User Secrets or an environment variable.");
+            }
+
+            return password;
+        }
         var admin = await GetOrCreateUserAsync(
             dbContext,
             "AD-001",
@@ -160,36 +177,36 @@ public static class IdentitySeeder
             userManager,
             admin,
             "admin",
-            "Admin123!");
+            RequiredPassword("Admin"));
 
         await SeedApplicationUserAsync(
             userManager,
             supervisor,
             "supervisor",
-            "Supervisor123!");
+            RequiredPassword("Supervisor"));
 
         await SeedApplicationUserAsync(
             userManager,
             technician,
             "technician",
-            "Technician123!");
+            RequiredPassword("Technician"));
 
         await SeedApplicationUserAsync(
             userManager,
             inventoryClerk,
             "inventoryclerk",
-            "Inventory123!");
+            RequiredPassword("Inventory"));
 
         await SeedApplicationUserAsync(
             userManager,
             pilot,
             "pilot",
-            "Pilot123!");
+            RequiredPassword("Pilot"));
 
         await SeedApplicationUserAsync(
             userManager,
             operationsManager,
             "operationsmanager",
-            "Operations123!");
+            RequiredPassword("Operations"));
     }
 }

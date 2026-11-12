@@ -13,7 +13,6 @@
 
   <ItemGroup>
     <PackageReference Include="MessagePack" Version="2.5.302" />
-    <PackageReference Include="Microsoft.VisualStudio.Language.Intellisense" Version="17.14.249" />
   </ItemGroup>
 
 </Project>
