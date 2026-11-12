@@ -16,7 +16,7 @@
     <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.1" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
     <PackageReference Include="MediatR" Version="14.2.0" />
-    <PackageReference Include="MessagePack" Version="2.5.302" />
+    <PackageReference Include="MessagePack" Version="2.5.303" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.18" />
     <PackageReference Include="System.ObjectModel" Version="4.3.0" />
   </ItemGroup>
