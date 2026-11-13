@@ -56,17 +56,18 @@ builder.Services.AddApplication();
 
 var app = builder.Build();
 
-using (var scope = app.Services.CreateScope())
+if (app.Environment.IsDevelopment())
 {
+    using var scope = app.Services.CreateScope();
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
     var dbContext = scope.ServiceProvider.GetRequiredService<AircraftMaintenanceDbContext>();
 
-    if (app.Environment.IsDevelopment())
-    {
-        await IdentitySeeder.SeedRolesAsync(roleManager);
-        await IdentitySeeder.SeedUserAsync(userManager, dbContext, app.Configuration);
-    }
+    await IdentitySeeder.SeedRolesAsync(roleManager);
+    await IdentitySeeder.SeedUserAsync(
+        userManager,
+        dbContext,
+        app.Configuration);
 }
 
 // Configure the HTTP request pipeline.
@@ -85,3 +86,5 @@ app.UseAuthorization();
 app.MapCarter();
 
 app.Run();
+
+public partial class Program { }

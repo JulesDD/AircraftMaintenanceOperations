@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="MessagePack" Version="2.5.303" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="9.0.18" />
     <PackageReference Include="MSTest" Version="4.0.2" />
 	<PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.18" />
   </ItemGroup>
