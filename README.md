@@ -1,4 +1,4 @@
-# ✈️ Aircraft Maintenance Operations Platform
+﻿# ✈️ Aircraft Maintenance Operations Platform
 
 A backend-focused aircraft maintenance operations platform built with
 ASP.NET Core, .NET, Clean Architecture, CQRS, Domain-Driven Design
@@ -342,7 +342,7 @@ See [docs/README.md](docs/README.md) for the documentation index.
 
 ## 👨‍💻 Author
 
-**Jules Douglas**  
+**Jules Douglas** 
 Backend Software Developer
 
 This repository documents an ongoing journey building enterprise-style
