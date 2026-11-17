@@ -55,10 +55,10 @@ public class WorkOrderEventConsumer
 
                     ProcessWorkOrderEvent(envelope);
 
-                    Console.WriteLine($"Topic: {result.Topic} | " + $"Partition: {result.Partition} | " + $"Offset: {result.Offset}");
-                    Console.WriteLine($"Key: {result.Message.Key}");
-                    Console.WriteLine($"Value: {result.Message.Value}");
-                    Console.WriteLine("--------------------------------");
+                    Console.WriteLine(
+                        $"Processed work-order event. Topic: {result.Topic}, " +
+                        $"Partition: {result.Partition}, Offset: {result.Offset}, " +
+                        $"EventType: {envelope.EventType}");
                 }
                 catch (OperationCanceledException)
                 {
@@ -148,8 +148,6 @@ public class WorkOrderEventConsumer
 
                     Console.WriteLine("WorkOrderConcludedEvent processed.");
                     Console.WriteLine($"Work Order ID: {workOrderEvent.WorkOrderId}");
-                    Console.WriteLine($"Concluded By: {workOrderEvent.ConcludedByUserId}");
-                    Console.WriteLine($"Labor Notes: {workOrderEvent.LaborNotes}");
                     Console.WriteLine($"Occurred At: {workOrderEvent.OccurredAt}");
                     break;
                 }
@@ -181,7 +179,6 @@ public class WorkOrderEventConsumer
 
                     Console.WriteLine($"Work Order ID: {workOrderEvent.WorkOrderId}");
                     Console.WriteLine($"Aircraft ID: {workOrderEvent.AircraftId}");
-                    Console.WriteLine($"Completed By: {workOrderEvent.CompletedByUserId}");
                     Console.WriteLine($"Occurred At: {workOrderEvent.OccurredAt}");
                     break;
                 }
@@ -198,9 +195,6 @@ public class WorkOrderEventConsumer
 
                     Console.WriteLine("WorkOrderOnHoldEvent processed.");
                     Console.WriteLine($"Work Order ID: {workOrderEvent.WorkOrderId}");
-                    Console.WriteLine($"Placed On Hold By: {workOrderEvent.OnHoldByUserId}");
-                    Console.WriteLine($"Hold Reason: {workOrderEvent.HoldReason}");
-                    Console.WriteLine($"Hold Notes: {workOrderEvent.HoldNotes}");
                     Console.WriteLine($"Previous Status: {workOrderEvent.PreviousStatus}");
                     Console.WriteLine($"Occurred At: {workOrderEvent.OccurredAt}");
                     break;
@@ -218,8 +212,6 @@ public class WorkOrderEventConsumer
 
                     Console.WriteLine("WorkOrderResumedEvent processed.");
                     Console.WriteLine($"Work Order ID: {workOrderEvent.WorkOrderId}");
-                    Console.WriteLine($"Resumed By: {workOrderEvent.ResumedByUserId}");
-                    Console.WriteLine($"Resume Notes: {workOrderEvent.ResumeNotes}");
                     Console.WriteLine($"Restored Status: {workOrderEvent.RestoredStatus}");
                     Console.WriteLine($"Occurred At: {workOrderEvent.OccurredAt}");
                     break;
@@ -235,8 +227,6 @@ public class WorkOrderEventConsumer
                     }
                     Console.WriteLine("WorkOrderInspectionPassedEvent processed.");
                     Console.WriteLine($"Work Order ID: {workOrderEvent.WorkOrderId}");
-                    Console.WriteLine($"Inspected By: {workOrderEvent.InspectedByUserId}");
-                    Console.WriteLine($"Inspection Notes: {workOrderEvent.InspectionNotes}");
                     Console.WriteLine($"Occurred At: {workOrderEvent.OccurredAt}");
                     break;
                 }
@@ -251,8 +241,6 @@ public class WorkOrderEventConsumer
                     }
                     Console.WriteLine("WorkOrderInspectionFailedEvent processed.");
                     Console.WriteLine($"Work Order ID: {workOrderEvent.WorkOrderId}");
-                    Console.WriteLine($"Inspected By: {workOrderEvent.InspectedByUserId}");
-                    Console.WriteLine($"Inspection Notes: {workOrderEvent.InspectionNotes}");
                     Console.WriteLine($"Occurred At: {workOrderEvent.OccurredAt}");
                     break;
                 }
@@ -269,8 +257,6 @@ public class WorkOrderEventConsumer
 
                     Console.WriteLine("WorkOrderReworkStartedEvent processed.");
                     Console.WriteLine($"Work Order ID: {workOrderEvent.WorkOrderId}");
-                    Console.WriteLine($"Reworked By: {workOrderEvent.ReworkedByUserId}");
-                    Console.WriteLine($"Rework Notes: {workOrderEvent.ReworkNotes}");
                     Console.WriteLine($"Occurred At: {workOrderEvent.OccurredAt}");
                     break;
                 }

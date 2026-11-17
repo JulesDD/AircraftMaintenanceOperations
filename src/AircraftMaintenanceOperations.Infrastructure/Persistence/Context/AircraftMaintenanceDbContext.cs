@@ -28,8 +28,6 @@ public class AircraftMaintenanceDbContext : IdentityDbContext<ApplicationUser, I
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
-        Console.WriteLine(">>> CUSTOM SaveChangesAsync CALLED <<<");
-
         var now = DateTime.UtcNow;
 
         foreach (var entry in ChangeTracker.Entries<BaseEntity>())

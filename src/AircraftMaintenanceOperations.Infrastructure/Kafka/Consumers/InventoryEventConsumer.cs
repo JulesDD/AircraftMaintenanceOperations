@@ -26,7 +26,6 @@ public class InventoryEventConsumer
             .Build();
 
         consumer.Subscribe("inventory-events");
-        //consumer.Subscribe("consumer-error-tests");
 
         Console.WriteLine("Inventory consumer started. Waiting for messages...");
 
@@ -56,10 +55,10 @@ public class InventoryEventConsumer
 
                     ProcessInventoryEvent(envelope);
 
-                    Console.WriteLine($"Topic: {result.Topic} | " + $"Partition: {result.Partition} | " + $"Offset: {result.Offset}");
-                    Console.WriteLine($"Key: {result.Message.Key}");
-                    Console.WriteLine($"Value: {result.Message.Value}");
-                    Console.WriteLine("--------------------------------");
+                    Console.WriteLine(
+                        $"Processed inventory event. Topic: {result.Topic}, " +
+                        $"Partition: {result.Partition}, Offset: {result.Offset}, " +
+                        $"EventType: {envelope.EventType}");
                 }
                 catch (OperationCanceledException)
                 {
@@ -99,12 +98,6 @@ public class InventoryEventConsumer
                         Console.Error.WriteLine("Failed to deserialize InventoryReceivedEvent.");
                         return;
                     }
-
-                    Console.WriteLine($"Inventory Part ID: {inventoryEvent.InventoryPartId}");
-                    Console.WriteLine($"Received By: {inventoryEvent.ReceivedByUserId}");
-                    Console.WriteLine($"Quantity: {inventoryEvent.Quantity}");
-                    Console.WriteLine($"Reason: {inventoryEvent.Reason}");
-                    Console.WriteLine($"Occurred At: {inventoryEvent.OccurredAt}");
                     break;
                 }
 
@@ -117,12 +110,6 @@ public class InventoryEventConsumer
                         Console.Error.WriteLine("Failed to deserialize InventoryAdjustedEvent.");
                         return;
                     }
-
-                    Console.WriteLine($"Inventory Part ID: {inventoryEvent.InventoryPartId}");
-                    Console.WriteLine($"Adjusted By: {inventoryEvent.AdjustedByUserId}");
-                    Console.WriteLine($"Quantity Change: {inventoryEvent.Quantity}");
-                    Console.WriteLine($"Reason: {inventoryEvent.Reason}");
-                    Console.WriteLine($"Occurred At: {inventoryEvent.OccurredAt}");
                     break;
                 }
 
@@ -135,13 +122,6 @@ public class InventoryEventConsumer
                         Console.Error.WriteLine("Failed to deserialize InventoryIssuedForWorkOrderEvent.");
                         return;
                     }
-
-                    Console.WriteLine($"Work Order ID: {inventoryEvent.WorkOrderId}");
-                    Console.WriteLine($"Inventory Part ID: {inventoryEvent.InventoryPartId}");
-                    Console.WriteLine($"Issued By: {inventoryEvent.IssuedByUserId}");
-                    Console.WriteLine($"Quantity Issued: {inventoryEvent.Quantity}");
-                    Console.WriteLine($"Reason: {inventoryEvent.Reason}");
-                    Console.WriteLine($"Occurred At: {inventoryEvent.OccurredAt}");
                     break;
                 }
 

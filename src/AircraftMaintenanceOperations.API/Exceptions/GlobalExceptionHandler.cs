@@ -1,12 +1,9 @@
-﻿namespace AircraftMaintenanceOperations.API.Exceptions;
+﻿
+namespace AircraftMaintenanceOperations.API.Exceptions;
 
-public sealed class GlobalExceptionHandler(
-    ILogger<GlobalExceptionHandler> logger) : IExceptionHandler
+public sealed class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger) : IExceptionHandler
 {
-    public async ValueTask<bool> TryHandleAsync(
-        HttpContext httpContext,
-        Exception exception,
-        CancellationToken cancellationToken)
+    public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
     {
         var statusCode = exception switch
         {
@@ -20,21 +17,17 @@ public sealed class GlobalExceptionHandler(
 
         if (statusCode == StatusCodes.Status500InternalServerError)
         {
-            logger.LogError(
-                exception,
-                "An unhandled exception occurred.");
+            logger.LogError(exception, "An unhandled exception occurred.");
         }
         else
         {
-            logger.LogWarning(
-                exception,
-                "Request failed with status code {StatusCode}.",
-                statusCode);
+            logger.LogWarning("Request failed with status code {StatusCode}.", statusCode);
         }
 
         var problemDetails = new ProblemDetails
         {
             Status = statusCode,
+            Type = $"https://httpstatuses.com/{statusCode}",
             Title = statusCode switch
             {
                 StatusCodes.Status400BadRequest => "Bad Request",
@@ -42,17 +35,11 @@ public sealed class GlobalExceptionHandler(
                 StatusCodes.Status403Forbidden => "Forbidden",
                 _ => "Internal Server Error"
             },
-            Detail = statusCode == StatusCodes.Status500InternalServerError
-                ? "An unexpected error occurred."
-                : exception.Message
+            Detail = statusCode == StatusCodes.Status500InternalServerError ? "An unexpected error occurred." : exception.Message
         };
 
         httpContext.Response.StatusCode = statusCode;
-
-        await httpContext.Response.WriteAsJsonAsync(
-            problemDetails,
-            cancellationToken);
-
+        await httpContext.Response.WriteAsJsonAsync(problemDetails, cancellationToken);
         return true;
     }
 }
