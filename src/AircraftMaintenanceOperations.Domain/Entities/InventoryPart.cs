@@ -2,61 +2,43 @@
 
 public class InventoryPart : BaseEntity
 {
-    public string PartNumber { get; set; } = string.Empty;
-    public string Description { get; set; } = string.Empty;
-    public InventoryPartType Type { get; set; }
-    public int QuantityOnHand { get; set; }
-    public int MinimumQuantity { get; set; } 
-    public string Location { get; set; } = string.Empty;
-    
+    public string PartNumber { get; private set; } = string.Empty;
+    public string Description { get; private set; } = string.Empty;
+    public InventoryPartType Type { get; private set; }
+    public int MinimumQuantity { get; private set; }
+
+    private InventoryPart()
+    {
+    }
+
     public static InventoryPart Create(
         string partNumber,
         string description,
         InventoryPartType type,
-        int quantityOnHand,
-        int minimumQuantity,
-        string location
-        )
+        int minimumQuantity)
     {
+        if (string.IsNullOrWhiteSpace(partNumber)) throw new ArgumentException("Part number is required.", nameof(partNumber));
+        if (string.IsNullOrWhiteSpace(description)) throw new ArgumentException("Description is required.", nameof(description));
+        if (minimumQuantity < 0) throw new ArgumentOutOfRangeException(nameof(minimumQuantity));
+
         return new InventoryPart
         {
-            PartNumber = partNumber,
-            Description = description,
+            PartNumber = partNumber.Trim(),
+            Description = description.Trim(),
             Type = type,
-            QuantityOnHand = quantityOnHand,
-            MinimumQuantity = minimumQuantity,
-            Location = location
+            MinimumQuantity = minimumQuantity
         };
     }
 
-    public DomainResult ReceivedStock(int quantity)
+    public void UpdateDescription(string description)
     {
-        if (quantity <= 0) return new(false, "Quantity received must be greater than zero.");
-
-        QuantityOnHand += quantity;
-        return new(true);
+        if (string.IsNullOrWhiteSpace(description)) throw new ArgumentException("Description is required.", nameof(description));
+        Description = description.Trim();
     }
 
-    public DomainResult AdjustStock(int quantity)
+    public void UpdateMinimumQuantity(int minimumQuantity)
     {
-        if (quantity == 0) return new(false, "Adjustment quantity cannot be zero.");
-        if (QuantityOnHand + quantity < 0) return new(false, "Adjustment cannot reduce inventory below zero.");
-
-        QuantityOnHand += quantity;
-        return new(true);
-    }
-
-    public bool NeedsRestock()
-    {
-        return QuantityOnHand < MinimumQuantity;
-    }
-
-    public DomainResult Consume(int quantity)
-    {
-        if (quantity <= 0) return new(false, "Quantity to consume must be greater than zero.");
-        if (quantity > QuantityOnHand) return new(false, "Not enough quantity on hand to consume.");
-
-        QuantityOnHand -= quantity;
-        return new(true);
+        if (minimumQuantity < 0) throw new ArgumentOutOfRangeException(nameof(minimumQuantity));
+        MinimumQuantity = minimumQuantity;
     }
 }

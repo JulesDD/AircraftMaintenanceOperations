@@ -13,13 +13,6 @@ public class IssueInventoryCommandHandler(IAircraftMaintenanceDbContext DbContex
         if (workOrder is null) throw new InvalidOperationException("Work order could not be found.");
         if (workOrder.WorkOrderStatus != WorkOrderStatus.InProgress) throw new InvalidOperationException("Inventory can only be issued to work orders that are in progress.");
 
-        var quantityBefore = inventory.QuantityOnHand;
-
-        var result = inventory.Consume(command.Quantity);
-        if (!result.IsSuccess) throw new InvalidOperationException(result.ErrorMessage);
-
-        var quantityAfter = inventory.QuantityOnHand;
-
         var inventoryUsage = new InventoryUsage
         {
             InventoryPartId = inventory.Id,

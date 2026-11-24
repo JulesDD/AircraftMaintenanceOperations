@@ -10,6 +10,8 @@ public interface IAircraftMaintenanceDbContext
     DbSet<InventoryPart> InventoryParts { get; }
     DbSet<InventoryUsage> InventoryUsages { get; }
     DbSet<InventoryTransaction> InventoryTransactions { get; }
+    DbSet<InventoryStock> InventoryStocks { get; }
+    DbSet<InventoryLocation> InventoryLocations { get; }
     DbSet<User> Users { get; }
     DbSet<WorkOrderCounter> WorkOrderCounters { get; }
     DbSet<MaintenanceRequestCounter> MaintenanceRequestCounters { get; }

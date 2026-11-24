@@ -7,6 +7,9 @@ public class ReceiveInventoryCommandHandler(IAircraftMaintenanceDbContext DbCont
         var inventoryPart = await DbContext.InventoryParts.FirstOrDefaultAsync(ip => ip.Id == command.InventoryPartId, cancellationToken);
         if (inventoryPart is null) throw new InvalidOperationException("Inventory part could not be found.");
 
+        var inventoryStock = await DbContext.InventoryStocks.FirstOrDefaultAsync(is => is.Location == command.Location, cancellationToken);
+        if (inventoryStock is null) throw new InvalidOperationException("Inventory stock could not be found.");
+
         var quantityBefore = inventoryPart.QuantityOnHand;
 
         var result = inventoryPart.ReceivedStock(command.Quantity);

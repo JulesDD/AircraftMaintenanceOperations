@@ -15,7 +15,9 @@ public class AircraftMaintenanceDbContext : IdentityDbContext<ApplicationUser, I
     public DbSet<WorkOrder> WorkOrders => Set<WorkOrder>();
     public DbSet<InventoryPart> InventoryParts => Set<InventoryPart>();
     public DbSet<InventoryUsage> InventoryUsages => Set<InventoryUsage>();
+    public DbSet<InventoryStock> InventoryStocks => Set<InventoryStock>();
     public DbSet<InventoryTransaction> InventoryTransactions => Set<InventoryTransaction>();
+    public DbSet<InventoryLocation> InventoryLocations => Set<InventoryLocation>();
     public DbSet<User> Users => Set<User>();
     public DbSet<WorkOrderCounter> WorkOrderCounters => Set<WorkOrderCounter>();
     public DbSet<MaintenanceRequestCounter> MaintenanceRequestCounters => Set<MaintenanceRequestCounter>();

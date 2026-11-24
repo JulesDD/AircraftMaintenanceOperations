@@ -13,3 +13,4 @@ global using MediatR;
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.Extensions.DependencyInjection;
 global using System.Reflection;
+global using AircraftMaintenanceOperations.Application.Features.InventoryTransaction.Commands.CreateInventory;
