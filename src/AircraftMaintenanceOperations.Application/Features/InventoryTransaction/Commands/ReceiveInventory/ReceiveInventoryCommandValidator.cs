@@ -4,8 +4,9 @@ public class ReceiveInventoryCommandValidator : AbstractValidator<ReceiveInvento
 {
     public ReceiveInventoryCommandValidator()
     {
-        RuleFor(x => x.InventoryPartId).NotEmpty().WithMessage("Please provide Inventory part Id.");
-        RuleFor(x => x.Quantity).GreaterThan(0).WithMessage("Provide a value greater than zero.");
-        RuleFor(x => x.Reason).NotEmpty().WithMessage("Provide details for item recieved.");
+        RuleFor(ri => ri.InventoryPartId).NotEmpty().WithMessage("Please provide Inventory part Id.");
+        RuleFor(ri => ri.InventoryLocationId).NotEmpty().WithMessage("Please provide Inventory location Id.");
+        RuleFor(ri => ri.Quantity).GreaterThan(0).WithMessage("Provide a value greater than zero.");
+        RuleFor(x => x.Reason).NotEmpty().WithMessage("Please provide details for the inventory receipt.").MaximumLength(500).WithMessage("Reason cannot exceed 500 characters.");
     }
 }

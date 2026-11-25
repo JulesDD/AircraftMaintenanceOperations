@@ -1,24 +1,25 @@
 ﻿namespace AircraftMaintenanceOperations.Application.Features.InventoryTransaction.Commands.CreateInventory;
 
-public class CreateInventoryCommandHandler(IAircraftMaintenanceDbContext DbContext, ICurrentUserService CurrentUser, IEventPublisher EventPublisher) : ICommandHandler<CreateInventoryCommand, CreateInventoryCommandResult>
+public class CreateInventoryCommandHandler(IAircraftMaintenanceDbContext DbContext, ICurrentUserService CurrentUser) : ICommandHandler<CreateInventoryCommand, CreateInventoryCommandResult>
 {
     public async Task<CreateInventoryCommandResult> Handle(CreateInventoryCommand command, CancellationToken cancellationToken)
     {
-        var domainUserId = await CurrentUser.GetDomainUserIdAsync(cancellationToken);
+        var isAuthorized = CurrentUser.Roles.Any(role => string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase) || 
+            string.Equals(role, "InventoryClerk", StringComparison.OrdinalIgnoreCase));
 
-        var inventory = await DbContext.InventoryParts.FirstOrDefaultAsync(i => i.PartNumber == command.PartNumber, cancellationToken);
-        if (inventory is not null) throw new InvalidOperationException($"Inventory part with part number {command.PartNumber} already exists.");  
+        if (!isAuthorized) throw new UnauthorizedAccessException("You are not authorized to create inventory items.");
+        var partExists = await DbContext.InventoryParts.AnyAsync(i => i.PartNumber == command.PartNumber, cancellationToken);
 
-        var inventoryTransaction = Domain.Entities.InventoryPart.Create(
+        if (partExists) throw new InvalidOperationException($"Inventory part with part number {command.PartNumber} already exists.");
+
+        var inventoryPart = Domain.Entities.InventoryPart.Create(
             command.PartNumber,
             command.Description,
             command.Type,
-            command.MinimumQuantity
-        );
+            command.MinimumQuantity);
 
-        DbContext.InventoryParts.Add(inventoryTransaction);
+        DbContext.InventoryParts.Add(inventoryPart);
         await DbContext.SaveChangesAsync(cancellationToken);
-
-        return new CreateInventoryCommandResult(inventoryTransaction.Id);
+        return new CreateInventoryCommandResult(inventoryPart.Id);
     }
 }

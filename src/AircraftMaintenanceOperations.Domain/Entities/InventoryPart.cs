@@ -19,7 +19,8 @@ public class InventoryPart : BaseEntity
     {
         if (string.IsNullOrWhiteSpace(partNumber)) throw new ArgumentException("Part number is required.", nameof(partNumber));
         if (string.IsNullOrWhiteSpace(description)) throw new ArgumentException("Description is required.", nameof(description));
-        if (minimumQuantity < 0) throw new ArgumentOutOfRangeException(nameof(minimumQuantity));
+        if (minimumQuantity < 0) throw new ArgumentException("Minimum quantity must be a non-negative value.", nameof(minimumQuantity));
+        if (!Enum.IsDefined(type)) throw new ArgumentOutOfRangeException(nameof(type));
 
         return new InventoryPart
         {
@@ -30,15 +31,17 @@ public class InventoryPart : BaseEntity
         };
     }
 
-    public void UpdateDescription(string description)
+    public DomainResult UpdateDescription(string description)
     {
         if (string.IsNullOrWhiteSpace(description)) throw new ArgumentException("Description is required.", nameof(description));
         Description = description.Trim();
+        return new(true);
     }
 
-    public void UpdateMinimumQuantity(int minimumQuantity)
+    public DomainResult UpdateMinimumQuantity(int minimumQuantity)
     {
-        if (minimumQuantity < 0) throw new ArgumentOutOfRangeException(nameof(minimumQuantity));
+        if (minimumQuantity < 0) throw new ArgumentException("Minimum quantity must be a non-negative value.", nameof(minimumQuantity));
         MinimumQuantity = minimumQuantity;
+        return new(true);
     }
 }

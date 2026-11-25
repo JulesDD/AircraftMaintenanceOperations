@@ -28,16 +28,18 @@ public class InventoryStock : BaseEntity
         };
     }
 
-    public void IncreaseQuantity(int quantity)
+    public DomainResult IncreaseQuantity(int quantity)
     {
-        if (quantity <= 0) throw new ArgumentOutOfRangeException(nameof(quantity));
+        if (quantity <= 0) throw new ArgumentException("Quantity must be a positive value.", nameof(quantity));
         Quantity += quantity;
+        return new(true);
     }
 
-    public void DecreaseQuantity(int quantity)
+    public DomainResult DecreaseQuantity(int quantity)
     {
-        if (quantity <= 0) throw new ArgumentOutOfRangeException(nameof(quantity));
-        if (quantity > Quantity) throw new InvalidOperationException("Insufficient stock quantity.");
+        if (quantity <= 0) throw new ArgumentException("Quantity must be a positive value.", nameof(quantity));
+        if (quantity > Quantity) throw new ArgumentException("Insufficient stock quantity.", nameof(quantity));
         Quantity -= quantity;
+        return new(true);
     }
 }

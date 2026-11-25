@@ -1,47 +1,80 @@
-﻿namespace AircraftMaintenanceOperations.Application.Features.InventoryTransaction.Commands.ReceiveInventory;
+﻿
+namespace AircraftMaintenanceOperations.Application.Features.InventoryTransaction.Commands.ReceiveInventory;
 
-public class ReceiveInventoryCommandHandler(IAircraftMaintenanceDbContext DbContext, ICurrentUserService CurrentUser, IEventPublisher EventPublisher) : ICommandHandler<ReceiveInventoryCommand, ReceiveInventoryCommandResult>
+public class ReceiveInventoryCommandHandler(IAircraftMaintenanceDbContext DbContext, ICurrentUserService CurrentUser)
+    : ICommandHandler<ReceiveInventoryCommand, ReceiveInventoryCommandResult>
 {
     public async Task<ReceiveInventoryCommandResult> Handle(ReceiveInventoryCommand command, CancellationToken cancellationToken)
     {
-        var inventoryPart = await DbContext.InventoryParts.FirstOrDefaultAsync(ip => ip.Id == command.InventoryPartId, cancellationToken);
-        if (inventoryPart is null) throw new InvalidOperationException("Inventory part could not be found.");
-
-        var inventoryStock = await DbContext.InventoryStocks.FirstOrDefaultAsync(is => is.Location == command.Location, cancellationToken);
-        if (inventoryStock is null) throw new InvalidOperationException("Inventory stock could not be found.");
-
-        var quantityBefore = inventoryPart.QuantityOnHand;
-
-        var result = inventoryPart.ReceivedStock(command.Quantity);
-        if (!result.IsSuccess) throw new InvalidOperationException(result.ErrorMessage);
-
-        var quantityAfter = inventoryPart.QuantityOnHand;
+        var isAuthorized = CurrentUser.Roles.Any(role => string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(role, "InventoryClerk", StringComparison.OrdinalIgnoreCase));
+        if (!isAuthorized) throw new UnauthorizedAccessException("You are not authorized to receive inventory.");
 
         var domainUserId = await CurrentUser.GetDomainUserIdAsync(cancellationToken);
 
-        var inventoryTransaction = Domain.Entities.InventoryTransaction.Create(
+        var inventoryPart = await DbContext.InventoryParts.FirstOrDefaultAsync(p => p.Id == command.InventoryPartId, cancellationToken);
+        if (inventoryPart is null) throw new InvalidOperationException("Inventory part could not be found.");
+
+
+        var inventoryLocation = await DbContext.InventoryLocations.FirstOrDefaultAsync(l => l.Id == command.InventoryLocationId, cancellationToken);
+        if (inventoryLocation is null) throw new InvalidOperationException("Inventory location could not be found.");
+        if (!inventoryLocation.IsActive) throw new InvalidOperationException("Cannot receive inventory into an inactive location.");
+
+        var condition = InventoryCondition.Serviceable;
+
+        var stockBalance = await DbContext.InventoryStocks
+            .FirstOrDefaultAsync(s =>
+                s.InventoryPartId == inventoryPart.Id &&
+                s.InventoryLocationId == inventoryLocation.Id &&
+                s.Condition == condition,
+                cancellationToken);
+
+        int quantityBefore;
+        int quantityAfter;
+
+        if (stockBalance is not null)
+        {
+            quantityBefore = stockBalance.Quantity;
+
+            var result = stockBalance.IncreaseQuantity(command.Quantity);
+
+            if (!result.IsSuccess)
+                throw new InvalidOperationException(result.ErrorMessage);
+
+            quantityAfter = stockBalance.Quantity;
+        }
+        else
+        {
+            quantityBefore = 0;
+
+            stockBalance = InventoryStock.Create(
+                inventoryPart,
+                command.Quantity,
+                inventoryLocation,
+                condition);
+
+            DbContext.InventoryStocks.Add(stockBalance);
+
+            quantityAfter = stockBalance.Quantity;
+        }
+
+        var transaction = Domain.Entities.InventoryTransaction.Create(
             inventoryPart.Id,
             InventoryTransactionType.Receipt,
+            condition,
             command.Quantity,
             quantityBefore,
             quantityAfter,
-            domainUserId,
+            inventoryLocation.Id,
+            workOrderId: null,
+            performedByUserId: domainUserId,
+            transactionDate: DateTime.UtcNow,
             reason: command.Reason);
 
-        DbContext.InventoryTransactions.Add(inventoryTransaction);
+        DbContext.InventoryTransactions.Add(transaction);
+
         await DbContext.SaveChangesAsync(cancellationToken);
 
-        var inventoryTransactionCreatedEvent = new InventoryReceivedEvent
-        {
-            EventId = Guid.NewGuid(),
-            ReceivedByUserId = domainUserId,
-            InventoryPartId = inventoryTransaction.InventoryPartId,
-            Quantity = command.Quantity,
-            Reason = command.Reason,
-            OccurredAt = DateTimeOffset.UtcNow
-        };
-
-        await EventPublisher.PublishAsync(inventoryTransactionCreatedEvent, cancellationToken);
-        return new ReceiveInventoryCommandResult(inventoryTransaction.Id);
+        return new ReceiveInventoryCommandResult(transaction.Id);
     }
 }
