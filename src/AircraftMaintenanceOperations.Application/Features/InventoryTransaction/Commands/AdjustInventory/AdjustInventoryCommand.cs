@@ -2,6 +2,8 @@
 
 public record AdjustInventoryCommand(
     Guid InventoryPartId,
-    int Quantity, 
+    int AdjustmentQuantity,
+    Guid InventoryLocationId,
+    InventoryCondition Condition,
     string? Notes) : ICommand<AdjustInventoryCommandResult>;
 public record AdjustInventoryCommandResult(Guid Id);

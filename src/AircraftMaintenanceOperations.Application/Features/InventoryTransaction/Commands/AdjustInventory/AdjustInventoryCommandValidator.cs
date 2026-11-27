@@ -5,7 +5,9 @@ public class AdjustInventoryCommandValidator : AbstractValidator<AdjustInventory
     public AdjustInventoryCommandValidator()
     {
         RuleFor(x => x.InventoryPartId).NotEmpty().WithMessage("InventoryPartId is required.");
-        RuleFor(x => x.Quantity).NotEqual(0).WithMessage("Adjustment quantity cannot be zero.");
+        RuleFor(x => x.AdjustmentQuantity).NotEqual(0).WithMessage("Adjustment quantity cannot be zero.");
+        RuleFor(x => x.Condition).IsInEnum().WithMessage("Invalid inventory condition.");
+        RuleFor(x => x.InventoryLocationId).NotEmpty().WithMessage("InventoryLocationId is required.");
         RuleFor(x => x.Notes).NotEmpty().WithMessage("Notes are required.");
         RuleFor(x => x.Notes).MaximumLength(500).WithMessage("Notes cannot exceed 500 characters.");
     }

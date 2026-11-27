@@ -62,8 +62,7 @@ public class InventoryTransaction : BaseEntity
         if (performedByUserId == Guid.Empty) throw new ArgumentException("User ID cannot be empty.");
         if (!Enum.IsDefined(transactionType)) throw new ArgumentException(nameof(transactionType));
         if (!Enum.IsDefined(condition)) throw new ArgumentException(nameof(condition));
-        if (quantityBefore <= 0 || quantityAfter <= 0) throw new ArgumentException("Quantity values must be greater than zero.");
-        if (quantityAfter < quantityBefore) throw new ArgumentException("The quantity after must be greater than the value before.");
+        if (quantityBefore < 0 || quantityAfter < 0) throw new ArgumentException("Quantity values must be greater than zero.");
 
 
 
